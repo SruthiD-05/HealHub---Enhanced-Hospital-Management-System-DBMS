@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HealHub – Hospital Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --teal:    #0D7377;
+    --teal2:   #14A085;
+    --teal3:   #1BC6A8;
+    --navy:    #0A1628;
+    --slate:   #1E2D40;
+    --panel:   #F5F8FA;
+    --border:  #D6E4EC;
+    --text:    #1E2D40;
+    --sub:     #5A7A8A;
+    --white:   #FFFFFF;
+    --red:     #E74C3C;
+    --amber:   #F39C12;
+    --green:   #27AE60;
+    --purple:  #8E44AD;
+    --card-shadow: 0 2px 16px rgba(13,115,119,0.10);
+    --sidebar-w: 230px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--panel); color: var(--text); display: flex; min-height: 100vh; font-size: 14px; }
+  .field-err { font-size: 11px; color: var(--red); margin-top: 3px; display: block; min-height: 14px; }
+  input.invalid, select.invalid { border-color: var(--red) !important; background: rgba(231,76,60,0.04); }
+
+  /* LOGIN */
+  #login-page { position: fixed; inset: 0; z-index: 9999; display: flex; background: var(--navy); overflow: hidden; }
+  .login-left { flex: 1; background: linear-gradient(145deg, #0A1628 0%, #0D4F53 60%, #0D7377 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px; position: relative; overflow: hidden; }
+  .login-left::before { content: ''; position: absolute; width: 500px; height: 500px; border-radius: 50%; border: 60px solid rgba(27,198,168,0.07); top: -100px; left: -100px; }
+  .login-left::after { content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%; border: 40px solid rgba(27,198,168,0.05); bottom: -60px; right: -60px; }
+  .login-brand { text-align: center; position: relative; z-index: 1; }
+  .login-brand-icon { width: 80px; height: 80px; background: var(--teal3); border-radius: 24px; display: grid; place-items: center; margin: 0 auto 20px; box-shadow: 0 8px 32px rgba(27,198,168,0.3); }
+  .login-brand-icon svg { width: 44px; height: 44px; fill: white; }
+  .login-brand-name { font-family: 'DM Serif Display', serif; font-size: 48px; color: white; line-height: 1; }
+  .login-brand-tagline { font-size: 14px; color: rgba(255,255,255,0.55); margin-top: 10px; letter-spacing: 1px; }
+  .login-features { margin-top: 60px; position: relative; z-index: 1; width: 100%; max-width: 340px; }
+  .login-feature { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .login-feature:last-child { border-bottom: none; }
+  .lf-icon { width: 38px; height: 38px; background: rgba(27,198,168,0.15); border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; font-size: 18px; }
+  .lf-text { color: rgba(255,255,255,0.75); font-size: 13.5px; }
+  .lf-label { font-weight: 600; color: white; font-size: 14px; }
+  .login-right { width: 460px; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 50px; }
+  .login-form-title { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--navy); margin-bottom: 6px; text-align: center; }
+  .login-form-sub { font-size: 13px; color: var(--sub); text-align: center; margin-bottom: 36px; }
+  .login-form { width: 100%; }
+  .login-form .form-group { margin-bottom: 18px; }
+  .login-form label { display: block; font-size: 11px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: .7px; margin-bottom: 7px; }
+  .login-form input { width: 100%; padding: 12px 15px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); outline: none; transition: border-color .15s; }
+  .login-form input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(13,115,119,0.10); }
+  .login-roles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px; }
+  .role-btn { padding: 10px; border: 1.5px solid var(--border); border-radius: 10px; cursor: pointer; background: white; font-family: 'DM Sans', sans-serif; transition: all .15s; text-align: center; }
+  .role-btn .role-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+  .role-btn .role-label { font-size: 12px; font-weight: 600; color: var(--navy); }
+  .role-btn.selected { border-color: var(--teal); background: rgba(13,115,119,0.05); }
+  .login-btn { width: 100%; padding: 13px; background: var(--teal); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background .15s; margin-top: 4px; }
+  .login-btn:hover { background: var(--teal2); }
+  .login-hint { text-align: center; font-size: 12px; color: var(--sub); margin-top: 20px; padding: 12px; background: var(--panel); border-radius: 9px; }
+  .login-error { background: rgba(231,76,60,.10); color: var(--red); border-radius: 9px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; text-align: center; }
+  .login-error.show { display: block; }
+  @keyframes loginFadeOut { to { opacity: 0; transform: scale(1.03); pointer-events: none; } }
+  .login-fade-out { animation: loginFadeOut .4s ease forwards; }
+
+  /* SIDEBAR */
+  #sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
+  .brand { padding: 28px 22px 20px; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .brand-logo { display: flex; align-items: center; gap: 10px; }
+  .brand-icon { width: 36px; height: 36px; background: var(--teal3); border-radius: 10px; display: grid; place-items: center; }
+  .brand-icon svg { width: 20px; height: 20px; fill: white; }
+  .brand-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: white; }
+  .brand-sub { font-size: 10px; color: var(--teal3); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 3px; }
+  nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+  .nav-section { padding: 8px 22px 4px; font-size: 9px; letter-spacing: 1.8px; color: #4A6B7F; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 22px; cursor: pointer; color: #A0B8C8; font-size: 13.5px; font-weight: 500; transition: background .15s, color .15s; border-left: 3px solid transparent; }
+  .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .nav-item:hover { background: rgba(255,255,255,.05); color: white; }
+  .nav-item.active { background: rgba(27,198,168,.10); color: var(--teal3); border-left-color: var(--teal3); }
+  .sidebar-footer { padding: 16px 22px; border-top: 1px solid rgba(255,255,255,.07); font-size: 11px; color: #4A6B7F; }
+
+  /* MAIN */
+  #main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  #topbar { background: white; border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 90; }
+  .topbar-title { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--navy); }
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+  .badge { background: var(--teal3); color: white; border-radius: 20px; font-size: 10px; padding: 2px 8px; font-weight: 600; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--teal); color: white; display: grid; place-items: center; font-weight: 700; font-size: 13px; }
+  #content { padding: 28px 32px; flex: 1; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* STAT CARDS */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 26px; }
+  .stat-card { background: white; border-radius: 14px; padding: 20px 22px; box-shadow: var(--card-shadow); border: 1px solid var(--border); display: flex; align-items: flex-start; gap: 14px; transition: transform .2s; }
+  .stat-card:hover { transform: translateY(-2px); }
+  .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; }
+  .stat-icon svg { width: 22px; height: 22px; }
+  .stat-icon.teal { background: rgba(13,115,119,.10); color: var(--teal); }
+  .stat-icon.green { background: rgba(39,174,96,.10); color: var(--green); }
+  .stat-icon.amber { background: rgba(243,156,18,.10); color: var(--amber); }
+  .stat-icon.red { background: rgba(231,76,60,.10); color: var(--red); }
+  .stat-icon.purple { background: rgba(142,68,173,.10); color: var(--purple); }
+  .stat-value { font-size: 26px; font-weight: 700; color: var(--navy); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--sub); margin-top: 4px; }
+  .stat-change { font-size: 11px; margin-top: 6px; color: var(--green); }
+
+  .sec-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .sec-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--navy); }
+
+  .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; font-family: 'DM Sans', sans-serif; }
+  .btn-primary { background: var(--teal); color: white; }
+  .btn-primary:hover { background: var(--teal2); }
+  .btn-outline { background: white; color: var(--teal); border: 1.5px solid var(--teal); }
+  .btn-outline:hover { background: rgba(13,115,119,.06); }
+  .btn-sm { padding: 5px 11px; font-size: 12px; border-radius: 7px; }
+  .btn-danger { background: var(--red); color: white; }
+  .btn-danger:hover { opacity: .88; }
+  .btn svg { width: 15px; height: 15px; }
+  .btn-purple { background: var(--purple); color: white; }
+  .btn-purple:hover { opacity: .88; }
+
+  .card { background: white; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--card-shadow); overflow: hidden; }
+  .card-body { padding: 20px 22px; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: var(--panel); padding: 11px 14px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--sub); border-bottom: 1px solid var(--border); }
+  tbody tr { border-bottom: 1px solid #F0F4F7; transition: background .12s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #F8FCFD; }
+  td { padding: 11px 14px; font-size: 13.5px; vertical-align: middle; }
+  .td-bold { font-weight: 600; color: var(--navy); }
+
+  .status { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: .3px; }
+  .status-admitted { background: rgba(13,115,119,.12); color: var(--teal); }
+  .status-discharged { background: rgba(39,174,96,.12); color: var(--green); }
+  .status-critical { background: rgba(231,76,60,.12); color: var(--red); }
+  .status-available { background: rgba(39,174,96,.12); color: var(--green); }
+  .status-occupied { background: rgba(231,76,60,.12); color: var(--red); }
+  .status-pending { background: rgba(243,156,18,.12); color: var(--amber); }
+  .status-paid { background: rgba(39,174,96,.12); color: var(--green); }
+  .status-opd { background: rgba(142,68,173,.12); color: var(--purple); }
+  .status-completed { background: rgba(39,174,96,.12); color: var(--green); }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  label { font-size: 12px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: .6px; }
+  input, select, textarea { padding: 9px 13px; border: 1.5px solid var(--border); border-radius: 9px; font-size: 13.5px; font-family: 'DM Sans', sans-serif; color: var(--text); background: white; transition: border-color .15s; outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: var(--teal); }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,22,40,.55); z-index: 200; place-items: center; }
+  .modal-overlay.open { display: grid; }
+  .modal { background: white; border-radius: 18px; padding: 28px 30px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; animation: popIn .2s ease; }
+  @keyframes popIn { from { transform: scale(.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+  .modal-title { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--navy); }
+  .modal-close { width: 30px; height: 30px; border-radius: 8px; border: none; background: var(--panel); cursor: pointer; font-size: 16px; display: grid; place-items: center; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+
+  .dash-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+  .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .qa-btn { background: white; border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: all .18s; text-align: left; font-family: 'DM Sans', sans-serif; }
+  .qa-btn:hover { border-color: var(--teal); background: rgba(13,115,119,.03); }
+  .qa-icon { font-size: 22px; margin-bottom: 8px; }
+  .qa-label { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .qa-sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
+
+  .search-wrap { position: relative; }
+  .search-wrap input { padding-left: 36px; width: 220px; }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--sub); }
+  .search-icon svg { width: 16px; height: 16px; }
+
+  .activity-item { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid #F0F4F7; }
+  .activity-item:last-child { border-bottom: none; }
+  .act-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--teal3); margin-top: 4px; flex-shrink: 0; }
+  .act-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .act-time { font-size: 11px; color: var(--sub); margin-top: 2px; }
+
+  .mini-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .mini-bar-label { font-size: 12px; color: var(--sub); width: 80px; flex-shrink: 0; }
+  .mini-bar-track { flex: 1; height: 8px; background: var(--panel); border-radius: 4px; overflow: hidden; }
+  .mini-bar-fill { height: 100%; border-radius: 4px; background: var(--teal2); transition: width .6s ease; }
+  .mini-bar-val { font-size: 12px; font-weight: 600; color: var(--navy); width: 28px; text-align: right; }
+
+  .bill-total { background: linear-gradient(135deg, var(--teal) 0%, var(--teal2) 100%); color: white; border-radius: 12px; padding: 18px 22px; margin-bottom: 12px; }
+  .bill-total-label { font-size: 11px; opacity: .75; text-transform: uppercase; letter-spacing: 1px; }
+  .bill-total-val { font-size: 30px; font-weight: 700; margin-top: 4px; }
+
+  .opd-summary { background: linear-gradient(135deg, #6C3483 0%, #8E44AD 100%); color: white; border-radius: 14px; padding: 20px 22px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+  .opd-sum-item { text-align: center; }
+  .opd-sum-val { font-size: 24px; font-weight: 700; }
+  .opd-sum-label { font-size: 11px; opacity: .75; margin-top: 3px; text-transform: uppercase; letter-spacing: .5px; }
+
+  #toast { position: fixed; bottom: 28px; right: 28px; background: var(--navy); color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; box-shadow: 0 4px 24px rgba(0,0,0,.3); z-index: 999; transform: translateY(20px); opacity: 0; transition: all .3s; display: flex; align-items: center; gap: 10px; max-width: 320px; }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast .toast-icon { font-size: 16px; }
+
+  .loading-row td { text-align:center; color: var(--sub); padding: 30px; font-size:13px; }
+  .spinner { display:inline-block; width:18px; height:18px; border:2px solid var(--border); border-top-color:var(--teal); border-radius:50%; animation: spin .6s linear infinite; vertical-align:middle; margin-right:8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .history-search-wrap { margin-bottom: 24px; }
+  .history-search-box { display: flex; align-items: center; gap: 12px; background: white; border: 1.5px solid var(--border); border-radius: 14px; padding: 10px 16px; box-shadow: var(--card-shadow); }
+  .hs-icon { font-size: 18px; flex-shrink: 0; }
+  .history-search-box input { flex: 1; border: none; outline: none; font-size: 14.5px; font-family: 'DM Sans', sans-serif; color: var(--text); background: transparent; padding: 4px 0; }
+  .history-empty { text-align: center; padding: 70px 20px; color: var(--sub); }
+  .ph-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; background: white; color: var(--navy); font-family: 'DM Sans', sans-serif; transition: all .15s; }
+  .ph-pill:hover { border-color: var(--teal); background: rgba(13,115,119,.05); color: var(--teal); }
+  .patient-banner { background: linear-gradient(135deg, var(--navy) 0%, #0D4F53 60%, var(--teal) 100%); border-radius: 16px; padding: 28px 32px; color: white; display: flex; align-items: center; gap: 24px; margin-bottom: 24px; position: relative; overflow: hidden; }
+  .patient-banner::after { content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%; border: 50px solid rgba(27,198,168,0.08); right: -80px; top: -80px; }
+  .pb-avatar { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.15); display: grid; place-items: center; font-size: 28px; font-weight: 700; flex-shrink: 0; border: 3px solid rgba(255,255,255,0.3); position: relative; z-index: 1; }
+  .pb-info { flex: 1; position: relative; z-index: 1; }
+  .pb-name { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 4px; }
+  .pb-meta { font-size: 13px; opacity: .75; display: flex; gap: 18px; flex-wrap: wrap; margin-top: 6px; }
+  .pb-id-badge { background: rgba(27,198,168,0.25); border: 1px solid rgba(27,198,168,0.4); border-radius: 8px; padding: 4px 12px; font-size: 13px; font-weight: 700; letter-spacing: 1px; position: relative; z-index: 1; }
+  .timeline-item { display: flex; gap: 16px; margin-bottom: 16px; position: relative; }
+  .timeline-item::before { content: ''; position: absolute; left: 19px; top: 42px; bottom: -16px; width: 2px; background: var(--border); }
+  .timeline-item:last-child::before { display: none; }
+  .tl-dot { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; font-size: 17px; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+  .tl-dot.admission { background: rgba(13,115,119,.15); }
+  .tl-dot.treatment { background: rgba(39,174,96,.15); }
+  .tl-dot.bill { background: rgba(243,156,18,.15); }
+  .tl-dot.visit { background: rgba(142,68,173,.15); }
+  .tl-card { flex: 1; background: white; border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; box-shadow: 0 1px 6px rgba(13,115,119,.06); }
+  .tl-card-title { font-weight: 700; color: var(--navy); font-size: 13.5px; margin-bottom: 4px; }
+  .tl-card-sub { font-size: 12px; color: var(--sub); line-height: 1.6; }
+  .tl-card-date { font-size: 11px; color: var(--teal); font-weight: 600; margin-top: 6px; }
+  .ph-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+  .ph-side-card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; box-shadow: var(--card-shadow); margin-bottom: 16px; }
+  .ph-side-title { font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--navy); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #F5F8FA; font-size: 13px; }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: var(--sub); font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+  .info-val { font-weight: 600; color: var(--navy); text-align: right; }
+  .doctor-banner { background: linear-gradient(135deg, #0A1628 0%, #0D5C60 55%, var(--teal2) 100%); border-radius: 16px; padding: 28px 32px; color: white; display: flex; align-items: center; gap: 24px; position: relative; overflow: hidden; }
+  .db-info { flex: 1; position: relative; z-index: 1; }
+  .db-name { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 4px; }
+  .db-meta { font-size: 13px; opacity: .75; display: flex; gap: 18px; flex-wrap: wrap; margin-top: 6px; }
+  .db-private-badge { font-size: 11px; background: rgba(231,76,60,.25); border: 1px solid rgba(231,76,60,.4); color: #ff8a7a; border-radius: 6px; padding: 3px 10px; font-weight: 600; margin-top: 8px; display: inline-block; }
+  .doc-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .doc-stat-box { background: var(--panel); border-radius: 10px; padding: 14px 16px; text-align: center; }
+  .doc-stat-val { font-size: 22px; font-weight: 700; color: var(--navy); }
+  .doc-stat-label { font-size: 11px; color: var(--sub); margin-top: 3px; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* OTP */
+  .otp-phone-display { display: flex; align-items: center; gap: 10px; background: var(--panel); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; font-size: 14px; font-weight: 600; color: var(--navy); }
+  .otp-input-row { display: flex; gap: 10px; justify-content: center; margin: 22px 0; }
+  .otp-digit { width: 50px; height: 56px; text-align: center; font-size: 22px; font-weight: 700; border: 2px solid var(--border); border-radius: 12px; font-family: 'DM Sans', sans-serif; color: var(--navy); outline: none; transition: border-color .15s; background: white; }
+  .otp-digit:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(13,115,119,0.12); }
+  .otp-digit.filled { border-color: var(--teal2); background: rgba(13,115,119,.04); }
+  .otp-sms-bubble { background: linear-gradient(135deg, #0D7377 0%, #1BC6A8 100%); border-radius: 14px; padding: 14px 18px; color: white; font-size: 13px; margin-bottom: 18px; position: relative; box-shadow: 0 4px 16px rgba(13,115,119,.25); display: none; }
+  .otp-sms-bubble.show { display: block; }
+  .otp-sms-from { font-size: 11px; opacity: .75; margin-bottom: 4px; text-transform: uppercase; }
+  .otp-sms-code { font-size: 26px; font-weight: 800; letter-spacing: 6px; margin: 4px 0; }
+  .otp-timer { text-align: center; font-size: 12px; color: var(--sub); margin-top: 6px; }
+  .otp-timer span { color: var(--teal); font-weight: 700; }
+  .otp-error { color: var(--red); font-size: 12px; text-align: center; display: none; margin-top: 6px; }
+  .otp-error.show { display: block; }
+  .otp-step { display: block; }
+  .otp-step.hidden { display: none; }
+  .send-otp-btn { width: 100%; padding: 12px; background: var(--teal); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background .15s; margin-top: 4px; }
+  .send-otp-btn:hover { background: var(--teal2); }
+  .verify-otp-btn { width: 100%; padding: 12px; background: var(--green); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 4px; }
+  .otp-lock-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(231,76,60,.08); border: 1px solid rgba(231,76,60,.18); color: var(--red); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
+  .role-guard { text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 1.5px dashed var(--border); color: var(--sub); }
+  .role-guard-icon { font-size: 44px; margin-bottom: 12px; }
+  .role-guard-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--navy); margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="login-page">
+  <div class="login-left">
+    <div class="login-brand">
+      <div class="login-brand-icon"><svg viewBox="0 0 24 24"><rect x="11" y="6" width="2" height="12"/><rect x="7" y="10" width="10" height="2"/><circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="1.5"/></svg></div>
+      <div class="login-brand-name">HealHub</div>
+      <div class="login-brand-tagline">ENHANCED HOSPITAL MANAGEMENT SYSTEM</div>
+    </div>
+    <div class="login-features">
+      <div class="login-feature"><div class="lf-icon">👤</div><div><div class="lf-label">Patient Management</div><div class="lf-text">Register, admit, and track patients</div></div></div>
+      <div class="login-feature"><div class="lf-icon">🩺</div><div><div class="lf-label">OPD / Outpatient Visits</div><div class="lf-text">Log consultations without admission</div></div></div>
+      <div class="login-feature"><div class="lf-icon">🏥</div><div><div class="lf-label">Room & Admission Control</div><div class="lf-text">Real-time room availability tracking</div></div></div>
+      <div class="login-feature"><div class="lf-icon">💳</div><div><div class="lf-label">Automated Billing</div><div class="lf-text">Generate and manage invoices</div></div></div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-form-title">Welcome Back</div>
+    <div class="login-form-sub">Sign in to access the hospital dashboard</div>
+    <div class="login-form">
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">Login as</label>
+        <div class="login-roles">
+          <button class="role-btn selected" onclick="selectRole(this,'Admin')"><span class="role-icon">🛡️</span><span class="role-label">Admin</span></button>
+          <button class="role-btn" onclick="selectRole(this,'Doctor')"><span class="role-icon">👨‍⚕️</span><span class="role-label">Doctor</span></button>
+          <button class="role-btn" onclick="selectRole(this,'Nurse')"><span class="role-icon">👩‍⚕️</span><span class="role-label">Nurse</span></button>
+          <button class="role-btn" onclick="selectRole(this,'Billing')"><span class="role-icon">💰</span><span class="role-label">Billing</span></button>
+        </div>
+      </div>
+      <div class="form-group"><label>Username</label><input type="text" id="login-user" placeholder="e.g. admin"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="login-error" id="login-error">❌ Invalid username or password.</div>
+      <button class="login-btn" onclick="doLogin()">Sign In →</button>
+      <div class="login-hint"><strong>Demo credentials:</strong><br>admin / admin123 &nbsp;|&nbsp; doctor / doc123 &nbsp;|&nbsp; nurse / nurse123 &nbsp;|&nbsp; billing / bill123</div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="brand">
+    <div class="brand-logo">
+      <div class="brand-icon"><svg viewBox="0 0 24 24"><rect x="11" y="6" width="2" height="12"/><rect x="7" y="10" width="10" height="2"/></svg></div>
+      <div><div class="brand-name">HealHub</div><div class="brand-sub">HMS v3.1</div></div>
+    </div>
+  </div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="navigate('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>Dashboard
+    </div>
+    <div class="nav-section">Management</div>
+    <div class="nav-item" onclick="navigate('patients',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Patients
+    </div>
+    <div class="nav-item" onclick="navigate('opd',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>OPD Visits
+      <span style="margin-left:auto;background:rgba(142,68,173,.25);color:#c39bd3;font-size:9px;padding:2px 6px;border-radius:8px;font-weight:700">NEW</span>
+    </div>
+    <div class="nav-item" onclick="navigate('doctors',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Doctors
+    </div>
+    <div class="nav-item" onclick="navigate('admissions',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Admissions (IPD)
+    </div>
+    <div class="nav-item" onclick="navigate('rooms',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>Rooms
+    </div>
+    <div class="nav-item" onclick="navigate('treatments',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2v6l2 2-2 2v6l6-3 6 3v-6l-2-2 2-2V2l-6 3-6-3z"/></svg>Treatments
+    </div>
+    <div class="nav-item" onclick="navigate('billing',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>Billing
+    </div>
+    <div class="nav-section">Cross-Hospital</div>
+    <div class="nav-item" onclick="navigate('patient-history',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2h-4v2.5H8L12 8l4-3.5h-2V2zM10 22h4v-2.5h2L12 16l-4 3.5h2V22z"/></svg>Patient History
+    </div>
+    <div class="nav-item" onclick="navigate('doctor-profile',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>Doctor Profile
+    </div>
+    <div class="nav-section">Advanced</div>
+    <div class="nav-item" onclick="navigate('organs',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Organ Registry
+    </div>
+    <div class="nav-item" onclick="navigate('reports',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>Reports & SQL
+    </div>
+  </nav>
+  <div class="sidebar-footer">SRM Institute of Science & Technology</div>
+</aside>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="topbar-right">
+      <span class="badge" id="db-status-badge">● CONNECTING</span>
+      <div class="avatar" title="Admin">AD</div>
+    </div>
+  </div>
+  <div id="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon teal"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div><div><div class="stat-value" id="stat-patients">—</div><div class="stat-label">Total Patients</div><div class="stat-change">↑ Active records</div></div></div>
+        <div class="stat-card"><div class="stat-icon purple"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg></div><div><div class="stat-value" id="stat-opd">—</div><div class="stat-label">OPD Visits Today</div><div class="stat-change" style="color:var(--purple)">Outpatients</div></div></div>
+        <div class="stat-card"><div class="stat-icon amber"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg></div><div><div class="stat-value" id="stat-rooms-avail">—</div><div class="stat-label">Rooms Available</div><div class="stat-change" style="color:var(--amber)">of total rooms</div></div></div>
+        <div class="stat-card"><div class="stat-icon red"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg></div><div><div class="stat-value" id="stat-revenue">—</div><div class="stat-label">Total Revenue</div><div class="stat-change" style="color:var(--teal)">All bills</div></div></div>
+      </div>
+      <div class="dash-grid">
+        <div>
+          <div class="sec-header"><div class="sec-title">Recent Admissions (IPD)</div></div>
+          <div class="card"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Room</th><th>Status</th></tr></thead><tbody id="dash-admissions"><tr class="loading-row"><td colspan="4"><span class="spinner"></span>Loading…</td></tr></tbody></table></div>
+          <div style="margin-top:20px">
+            <div class="sec-header"><div class="sec-title">Quick Actions</div></div>
+            <div class="quick-actions">
+              <button class="qa-btn" onclick="navigate('patients',null);openModal('modal-patient')"><div class="qa-icon">👤</div><div class="qa-label">Register Patient</div><div class="qa-sub">Add new patient record</div></button>
+              <button class="qa-btn" onclick="navigate('opd',null);openModal('modal-visit')"><div class="qa-icon">🩺</div><div class="qa-label">OPD Visit</div><div class="qa-sub">Log outpatient consultation</div></button>
+              <button class="qa-btn" onclick="navigate('admissions',null);openModal('modal-admission')"><div class="qa-icon">🏥</div><div class="qa-label">New Admission</div><div class="qa-sub">Admit a patient (IPD)</div></button>
+              <button class="qa-btn" onclick="navigate('billing',null);openModal('modal-bill')"><div class="qa-icon">💳</div><div class="qa-label">Generate Bill</div><div class="qa-sub">Create patient invoice</div></button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sec-header"><div class="sec-title">Bill Status</div></div>
+          <div class="card card-body" id="dept-bars"><div style="color:var(--sub);font-size:13px">Loading…</div></div>
+          <div style="margin-top:16px">
+            <div class="sec-header"><div class="sec-title">Recent Activity</div></div>
+            <div class="card card-body" id="activity-feed" style="max-height:220px;overflow-y:auto;"><div style="color:var(--sub);font-size:13px">Loading…</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PATIENTS -->
+    <div class="page" id="page-patients">
+      <div class="sec-header">
+        <div class="sec-title">Patient Records</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="search-wrap"><div class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><input type="text" placeholder="Search patients…" oninput="filterTable('tbl-patients',this.value,[0,1,5])"/></div>
+          <button class="btn btn-primary" onclick="openModal('modal-patient')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Add Patient</button>
+        </div>
+      </div>
+      <div class="card"><table><thead><tr><th>Patient ID</th><th>Name</th><th>Age</th><th>Phone</th><th>Address</th><th>Disease</th><th>Actions</th></tr></thead><tbody id="tbl-patients"><tr class="loading-row"><td colspan="7"><span class="spinner"></span>Loading…</td></tr></tbody></table></div>
+    </div>
+
+    <!-- OPD -->
+    <div class="page" id="page-opd">
+      <div class="sec-header">
+        <div class="sec-title">🩺 OPD — Outpatient Visits</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="search-wrap"><div class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><input type="text" placeholder="Search visits…" oninput="filterTable('tbl-visits',this.value,[0,1,3])"/></div>
+          <button class="btn btn-purple" onclick="openModal('modal-visit')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> New OPD Visit</button>
+        </div>
+      </div>
+      <div class="opd-summary">
+        <div class="opd-sum-item"><div class="opd-sum-val" id="opd-total">0</div><div class="opd-sum-label">Total Visits</div></div>
+        <div class="opd-sum-item"><div class="opd-sum-val" id="opd-today">0</div><div class="opd-sum-label">Today</div></div>
+        <div class="opd-sum-item"><div class="opd-sum-val" id="opd-revenue">₹0</div><div class="opd-sum-label">OPD Revenue</div></div>
+        <div class="opd-sum-item"><div class="opd-sum-val" id="opd-doctors">0</div><div class="opd-sum-label">Doctors Active</div></div>
+      </div>
+      <div class="card"><table><thead><tr><th>Visit ID</th><th>Date</th><th>Patient</th><th>Doctor</th><th>Symptoms</th><th>Diagnosis</th><th>Fee (₹)</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tbl-visits"><tr class="loading-row"><td colspan="9"><span class="spinner"></span>Loading…</td></tr></tbody></table></div>
+    </div>
+
+    <!-- DOCTORS -->
+    <div class="page" id="page-doctors">
+      <div class="sec-header">
+        <div class="sec-title">Doctor Directory</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="search-wrap"><div class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><input type="text" placeholder="Search doctors…" oninput="filterTable('tbl-doctors',this.value,[1,2])"/></div>
+          <button class="btn btn-primary" onclick="openModal('modal-doctor')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Add Doctor</button>
+        </div>
+      </div>
+      <div class="card"><table><thead><tr><th>Doctor ID</th><th>Name</th><th>Specialization</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tbl-doctors"><tr class="loading-row"><td colspan="6"><span class="spinner"></span>Loading…</td></tr></tbody></table></div>
+    </div>
+
+    <!-- ROOMS -->
+    <div class="page" id="page-rooms">
+      <div class="sec-header"><div class="sec-title">Room Management</div><button class="btn btn-primary" onclick="openModal('modal-room')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Add Room</button></div>
+      <div class="card"><table><thead><tr><th>Room ID</th><th>Room No.</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tbl-rooms"><tr class="loading-row"><td colspan="5"><span class="spinner"></span>Loading…</td></tr></tbody></table></div>
+    </div>
+
+    <!-- ADMISSIONS -->
+    <div class="page" id="page-admissions">
+      <div class="sec-header"><div class="sec-title">Admission Records (IPD)</div><button class="btn btn-primary" onclick="openModal('modal-admission')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> New Admission</button></div>
+      <div class="card"><table><thead><tr><th>Admission ID</th><th>Date In</th><th>Discharge</th><th>Type</th><th>Patient</th><th>Doctor</th><th>Room</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tbl-admissions"><tr class="loading-row"><td colspan="9"><span class="spinner"></span>Loading…</td></tr></tbody></table></div>
+    </div>
+
+    <!-- TREATMENTS -->
+    <div class="page" id="page-treatments">
+      <div class="sec-header"><div class="sec-title">Treatment Records</div><button class="btn btn-primary" onclick="openModal('modal-treatment')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Add Treatment</button></div>
+      <div class="card"><table><thead><tr><th>Treatment ID</th><th>Name</th><th>Cost (₹)</th><th>Admission ID</th><th>Organ ID</th><th>Actions</th></tr></thead><tbody id="tbl-treatments"><tr class="loading-row"><td colspan="6"><span class="spinner"></span>Loading…</td></tr></tbody></table></div>
+    </div>
+
+    <!-- BILLING -->
+    <div class="page" id="page-billing">
+      <div class="sec-header"><div class="sec-title">Billing & Invoices</div><button class="btn btn-primary" onclick="openModal('modal-bill')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Generate Bill</button></div>
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:20px">
+        <div>
+          <div class="bill-total"><div class="bill-total-label">Total Revenue</div><div class="bill-total-val" id="bill-total-display">₹—</div></div>
+          <div class="card card-body"><div class="sec-title" style="font-size:13px;margin-bottom:12px">By Status</div><div id="bill-status-bars"></div></div>
+        </div>
+        <div class="card"><table><thead><tr><th>Bill ID</th><th>Date</th><th>Amount (₹)</th><th>Status</th><th>Admission ID</th><th>Actions</th></tr></thead><tbody id="tbl-bills"><tr class="loading-row"><td colspan="6"><span class="spinner"></span>Loading…</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ORGANS -->
+    <div class="page" id="page-organs">
+      <div class="sec-header"><div class="sec-title">Organ Availability Registry</div><button class="btn btn-primary" onclick="openModal('modal-organ')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Add Organ Record</button></div>
+      <div class="card"><table><thead><tr><th>Organ ID</th><th>Organ Name</th><th>Donor Type</th><th>Availability</th><th>Actions</th></tr></thead><tbody id="tbl-organs"><tr class="loading-row"><td colspan="5"><span class="spinner"></span>Loading…</td></tr></tbody></table></div>
+    </div>
+
+    <!-- PATIENT HISTORY -->
+    <div class="page" id="page-patient-history">
+      <div class="sec-header">
+        <div class="sec-title">Patient Medical History</div>
+        <div style="font-size:12px;background:rgba(231,76,60,.07);padding:7px 14px;border-radius:8px;border:1px solid rgba(231,76,60,.18);color:var(--red);font-weight:600">🔒 OTP verification required</div>
+      </div>
+      <div id="ph-role-guard" class="role-guard" style="display:none"><div class="role-guard-icon">🔐</div><div class="role-guard-title">Access Restricted</div><div style="font-size:13px;color:var(--sub)">Only <strong>Doctors</strong> and <strong>Admins</strong> can access this.</div></div>
+      <div id="ph-main-content">
+        <div class="history-search-wrap">
+          <div class="history-search-box"><div class="hs-icon">🔍</div><input id="ph-search-input" type="text" placeholder="Enter Patient ID or Name…" onkeydown="if(event.key==='Enter')searchPatientHistory()"/><button class="btn btn-primary" onclick="searchPatientHistory()">Search Patient</button></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px" id="ph-quick-pills"></div>
+        </div>
+        <div id="ph-empty" class="history-empty"><div style="font-size:48px;margin-bottom:12px">🏥</div><div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy);margin-bottom:6px">Enter a Patient ID to view full history</div><div style="color:var(--sub);font-size:13px">Includes both OPD visits and IPD admissions</div></div>
+        <div id="ph-result" style="display:none"><div class="patient-banner" id="ph-banner"></div><div class="ph-grid"><div><div class="sec-title" style="margin-bottom:14px">📋 Medical Timeline</div><div id="ph-timeline"></div></div><div id="ph-side-panels"></div></div></div>
+        <div id="ph-notfound" style="display:none" class="history-empty"><div style="font-size:40px;margin-bottom:10px">❌</div><div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--red)">Patient Not Found</div></div>
+      </div>
+    </div>
+
+    <!-- DOCTOR PROFILE -->
+    <div class="page" id="page-doctor-profile">
+      <div class="sec-header">
+        <div class="sec-title">Doctor Profile Lookup</div>
+        <div style="font-size:12px;color:var(--sub);background:rgba(13,115,119,.07);padding:7px 14px;border-radius:8px;border:1px solid rgba(13,115,119,.15)">🌐 Cross-hospital — phone always private</div>
+      </div>
+      <div class="history-search-wrap">
+        <div class="history-search-box"><div class="hs-icon">🔍</div><input id="dp-search-input" type="text" placeholder="Enter Doctor ID or Name…" onkeydown="if(event.key==='Enter')searchDoctorProfile()"/><button class="btn btn-primary" onclick="searchDoctorProfile()">Search Doctor</button></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px" id="dp-quick-pills"></div>
+      </div>
+      <div id="dp-empty" class="history-empty"><div style="font-size:48px;margin-bottom:12px">👨‍⚕️</div><div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy)">Enter a Doctor ID to view their profile</div></div>
+      <div id="dp-result" style="display:none"><div class="doctor-banner" id="dp-banner"></div><div class="ph-grid" style="margin-top:20px"><div id="dp-patients-panel"></div><div id="dp-stats-panel"></div></div></div>
+      <div id="dp-notfound" style="display:none" class="history-empty"><div style="font-size:40px;margin-bottom:10px">❌</div><div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--red)">Doctor Not Found</div></div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="page" id="page-reports">
+      <div class="sec-title" style="margin-bottom:18px">Reports & SQL Query Showcase</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px" id="sql-cards"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-patient">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Register Patient</div><button class="modal-close" onclick="closeModal('modal-patient')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Patient ID *</label><input id="p-id" placeholder="e.g. P-006" oninput="clearErr('p-id')"/><span class="field-err" id="err-p-id"></span></div>
+      <div class="form-group full"><label>Full Name *</label><input id="p-name" placeholder="e.g. Ravi Kumar" oninput="clearErr('p-name')"/><span class="field-err" id="err-p-name"></span></div>
+      <div class="form-group"><label>Age *</label><input id="p-age" type="number" min="0" max="150" placeholder="28" oninput="clearErr('p-age')"/><span class="field-err" id="err-p-age"></span></div>
+      <div class="form-group"><label>Phone *</label><input id="p-phone" placeholder="9998887776" maxlength="10" oninput="clearErr('p-phone')"/><span class="field-err" id="err-p-phone"></span></div>
+      <div class="form-group full"><label>Address *</label><input id="p-address" placeholder="City, State" oninput="clearErr('p-address')"/><span class="field-err" id="err-p-address"></span></div>
+      <div class="form-group full"><label>Disease / Diagnosis *</label><input id="p-disease" placeholder="e.g. Hypertension…" oninput="clearErr('p-disease')"/><span class="field-err" id="err-p-disease"></span></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-patient')">Cancel</button><button class="btn btn-primary" onclick="savePatient()">Save Patient</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-visit">
+  <div class="modal" style="width:620px">
+    <div class="modal-header"><div class="modal-title">🩺 New OPD Visit</div><button class="modal-close" onclick="closeModal('modal-visit')">✕</button></div>
+    <div style="background:rgba(142,68,173,.06);border:1px solid rgba(142,68,173,.15);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:12.5px;color:var(--purple)">💡 OPD = Outpatient Department. For patients who come for consultation but do <strong>not</strong> require admission.</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Visit ID *</label><input id="v-id" placeholder="e.g. V-001" oninput="clearErr('v-id')"/><span class="field-err" id="err-v-id"></span></div>
+      <div class="form-group"><label>Visit Date *</label><input id="v-date" type="date" oninput="clearErr('v-date')"/><span class="field-err" id="err-v-date"></span></div>
+      <div class="form-group full"><label>Patient *</label><select id="v-patient" onchange="clearErr('v-patient')"><option value="">-- Select Patient --</option></select><span class="field-err" id="err-v-patient"></span></div>
+      <div class="form-group full"><label>Doctor *</label><select id="v-doctor" onchange="clearErr('v-doctor')"><option value="">-- Select Doctor --</option></select><span class="field-err" id="err-v-doctor"></span></div>
+      <div class="form-group full"><label>Symptoms *</label><input id="v-symptoms" placeholder="e.g. Fever, headache…" oninput="clearErr('v-symptoms')"/><span class="field-err" id="err-v-symptoms"></span></div>
+      <div class="form-group full"><label>Diagnosis *</label><input id="v-diagnosis" placeholder="e.g. Viral fever…" oninput="clearErr('v-diagnosis')"/><span class="field-err" id="err-v-diagnosis"></span></div>
+      <div class="form-group full"><label>Prescription / Notes</label><textarea id="v-prescription" placeholder="e.g. Tab Paracetamol 500mg TDS × 3 days…"></textarea></div>
+      <div class="form-group"><label>Consultation Fee (₹) *</label><input id="v-fee" type="number" min="0" placeholder="200" oninput="clearErr('v-fee')"/><span class="field-err" id="err-v-fee"></span></div>
+      <div class="form-group"><label>Status</label><select id="v-status"><option value="Completed">Completed</option><option value="Follow-up">Follow-up Needed</option><option value="Referred">Referred to IPD</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-visit')">Cancel</button><button class="btn btn-purple" onclick="saveVisit()">Save OPD Visit</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-doctor">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Doctor</div><button class="modal-close" onclick="closeModal('modal-doctor')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Doctor ID *</label><input id="d-id" placeholder="e.g. D-005" oninput="clearErr('d-id')"/><span class="field-err" id="err-d-id"></span></div>
+      <div class="form-group full"><label>Doctor Name *</label><input id="d-name" placeholder="e.g. Dr. Priya Sharma" oninput="clearErr('d-name')"/><span class="field-err" id="err-d-name"></span></div>
+      <div class="form-group"><label>Specialization *</label><input id="d-spec" placeholder="e.g. Cardiologist" oninput="clearErr('d-spec')"/><span class="field-err" id="err-d-spec"></span></div>
+      <div class="form-group"><label>Phone *</label><input id="d-phone" placeholder="9876543210" maxlength="10" oninput="clearErr('d-phone')"/><span class="field-err" id="err-d-phone"></span></div>
+      <div class="form-group full"><label>Status *</label><select id="d-status"><option value="Active">Active</option><option value="On Leave">On Leave</option><option value="Inactive">Inactive</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-doctor')">Cancel</button><button class="btn btn-primary" onclick="saveDoctor()">Save Doctor</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-room">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Room</div><button class="modal-close" onclick="closeModal('modal-room')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Room ID *</label><input id="r-id" placeholder="e.g. R-302" oninput="clearErr('r-id')"/><span class="field-err" id="err-r-id"></span></div>
+      <div class="form-group"><label>Room Number *</label><input id="r-num" placeholder="e.g. 302" oninput="clearErr('r-num')"/><span class="field-err" id="err-r-num"></span></div>
+      <div class="form-group"><label>Room Type *</label><select id="r-type"><option>General Ward</option><option>Private</option><option>ICU</option><option>Semi-Private</option><option>Emergency</option></select></div>
+      <div class="form-group"><label>Status *</label><select id="r-status"><option value="Available">Available</option><option value="Occupied">Occupied</option><option value="Under Maintenance">Under Maintenance</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-room')">Cancel</button><button class="btn btn-primary" onclick="saveRoom()">Save Room</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-admission">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">New Admission (IPD)</div><button class="modal-close" onclick="closeModal('modal-admission')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Admission ID *</label><input id="a-id" placeholder="e.g. A-004" oninput="clearErr('a-id')"/><span class="field-err" id="err-a-id"></span></div>
+      <div class="form-group"><label>Admission Date *</label><input id="a-date-in" type="date" oninput="clearErr('a-date-in')"/><span class="field-err" id="err-a-date-in"></span></div>
+      <div class="form-group"><label>Discharge Date</label><input id="a-date-out" type="date"/></div>
+      <div class="form-group full"><label>Type *</label><select id="a-type"><option value="Emergency">Emergency</option><option value="Planned">Planned</option><option value="Referral">Referral</option><option value="Transfer">Transfer</option><option value="Maternity">Maternity</option></select></div>
+      <div class="form-group full"><label>Patient *</label><select id="a-patient" onchange="clearErr('a-patient')"><option value="">-- Select Patient --</option></select><span class="field-err" id="err-a-patient"></span></div>
+      <div class="form-group full"><label>Doctor *</label><select id="a-doctor" onchange="clearErr('a-doctor')"><option value="">-- Select Doctor --</option></select><span class="field-err" id="err-a-doctor"></span></div>
+      <div class="form-group full"><label>Room *</label><select id="a-room" onchange="clearErr('a-room')"><option value="">-- Select Room --</option></select><span class="field-err" id="err-a-room"></span></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-admission')">Cancel</button><button class="btn btn-primary" onclick="saveAdmission()">Confirm Admission</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-treatment">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Treatment</div><button class="modal-close" onclick="closeModal('modal-treatment')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Treatment ID *</label><input id="t-id" placeholder="e.g. T-004" oninput="clearErr('t-id')"/><span class="field-err" id="err-t-id"></span></div>
+      <div class="form-group full"><label>Treatment Name *</label><input id="t-name" placeholder="e.g. ECG, MRI Scan…" oninput="clearErr('t-name')"/><span class="field-err" id="err-t-name"></span></div>
+      <div class="form-group full"><label>Cost (₹) *</label><input id="t-cost" type="number" min="0" placeholder="5000" oninput="clearErr('t-cost')"/><span class="field-err" id="err-t-cost"></span></div>
+      <div class="form-group full"><label>Admission ID *</label><select id="t-admission" onchange="clearErr('t-admission')"><option value="">-- Select Admission --</option></select><span class="field-err" id="err-t-admission"></span></div>
+      <div class="form-group full"><label>Organ ID (optional)</label><select id="t-organ"><option value="">-- None --</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-treatment')">Cancel</button><button class="btn btn-primary" onclick="saveTreatment()">Save Treatment</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-bill">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Generate Bill</div><button class="modal-close" onclick="closeModal('modal-bill')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Bill ID *</label><input id="b-id" placeholder="e.g. B-004" oninput="clearErr('b-id')"/><span class="field-err" id="err-b-id"></span></div>
+      <div class="form-group"><label>Issue Date *</label><input id="b-date" type="date" oninput="clearErr('b-date')"/><span class="field-err" id="err-b-date"></span></div>
+      <div class="form-group"><label>Amount (₹) *</label><input id="b-amount" type="number" min="0" placeholder="15000" oninput="clearErr('b-amount')"/><span class="field-err" id="err-b-amount"></span></div>
+      <div class="form-group full"><label>Payment Status *</label><select id="b-status"><option value="Pending">Pending</option><option value="Paid">Paid</option><option value="Partially Paid">Partially Paid</option><option value="Waived">Waived</option></select></div>
+      <div class="form-group full"><label>Admission ID *</label><select id="b-admission" onchange="clearErr('b-admission')"><option value="">-- Select Admission --</option></select><span class="field-err" id="err-b-admission"></span></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-bill')">Cancel</button><button class="btn btn-primary" onclick="saveBill()">Generate Bill</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-organ">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Organ Record</div><button class="modal-close" onclick="closeModal('modal-organ')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Organ ID *</label><input id="o-id" placeholder="e.g. O-003" oninput="clearErr('o-id')"/><span class="field-err" id="err-o-id"></span></div>
+      <div class="form-group"><label>Organ Name *</label><select id="o-name"><option>Kidney</option><option>Liver</option><option>Heart</option><option>Lungs</option><option>Pancreas</option><option>Cornea</option><option>Bone Marrow</option><option>Skin</option></select></div>
+      <div class="form-group"><label>Donor Type *</label><select id="o-donor-type"><option value="Living Donor">Living Donor</option><option value="Deceased Donor">Deceased Donor</option><option value="Anonymous">Anonymous</option></select></div>
+      <div class="form-group"><label>Availability *</label><select id="o-avail"><option value="Available">Available</option><option value="Reserved">Reserved</option><option value="Used">Used</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-organ')">Cancel</button><button class="btn btn-primary" onclick="saveOrgan()">Save Record</button></div>
+  </div>
+</div>
+
+<!-- OTP Modal -->
+<div class="modal-overlay" id="modal-otp">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><div class="modal-title">🔒 Secure Patient Report Access</div><button class="modal-close" onclick="closeOtpModal()">✕</button></div>
+    <div id="otp-step1" class="otp-step">
+      <p style="font-size:13px;color:var(--sub);margin-bottom:16px;line-height:1.6">An OTP will be sent to the patient's registered phone for identity verification.</p>
+      <div class="otp-lock-badge">🔐 Patient consent required</div>
+      <div class="otp-phone-display"><span style="font-size:20px">📱</span><div><div id="otp-patient-name" style="font-size:13px;color:var(--sub);margin-bottom:2px"></div><div id="otp-phone-masked"></div></div></div>
+      <button class="send-otp-btn" onclick="sendOtp()">📤 Send OTP to Patient's Phone</button>
+    </div>
+    <div id="otp-step2" class="otp-step hidden">
+      <p style="font-size:13px;color:var(--sub);margin-bottom:12px">Enter the 6-digit OTP sent to the patient's phone.</p>
+      <div class="otp-sms-bubble" id="otp-sms-bubble">
+        <div class="otp-sms-from">📨 HealHub SMS — just now</div>
+        <div class="otp-sms-code" id="otp-sms-code-display">------</div>
+        <div style="font-size:11px;opacity:.7">Valid for 5 minutes. Do not share.</div>
+      </div>
+      <div style="text-align:center;font-size:13px;color:var(--navy);font-weight:600;margin-bottom:4px">Enter 6-digit OTP</div>
+      <div class="otp-input-row">
+        <input class="otp-digit" id="otp-d1" maxlength="1" oninput="otpInput(this,1)" onkeydown="otpKey(event,1)" type="text" inputmode="numeric"/>
+        <input class="otp-digit" id="otp-d2" maxlength="1" oninput="otpInput(this,2)" onkeydown="otpKey(event,2)" type="text" inputmode="numeric"/>
+        <input class="otp-digit" id="otp-d3" maxlength="1" oninput="otpInput(this,3)" onkeydown="otpKey(event,3)" type="text" inputmode="numeric"/>
+        <input class="otp-digit" id="otp-d4" maxlength="1" oninput="otpInput(this,4)" onkeydown="otpKey(event,4)" type="text" inputmode="numeric"/>
+        <input class="otp-digit" id="otp-d5" maxlength="1" oninput="otpInput(this,5)" onkeydown="otpKey(event,5)" type="text" inputmode="numeric"/>
+        <input class="otp-digit" id="otp-d6" maxlength="1" oninput="otpInput(this,6)" onkeydown="otpKey(event,6)" type="text" inputmode="numeric"/>
+      </div>
+      <div class="otp-error" id="otp-error">❌ Incorrect OTP. Please try again.</div>
+      <div class="otp-timer">Expires in <span id="otp-countdown">5:00</span></div>
+      <button class="verify-otp-btn" onclick="verifyOtp()" style="margin-top:16px">✅ Verify & View Report</button>
+      <div style="text-align:center;margin-top:10px"><button onclick="resendOtp()" style="background:none;border:none;color:var(--teal);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline">Resend OTP</button></div>
+    </div>
+    <div id="otp-step3" class="otp-step hidden">
+      <div style="text-align:center;padding:10px 0"><div style="font-size:52px;margin-bottom:10px">✅</div><div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy);margin-bottom:6px">Identity Verified!</div><div style="font-size:13px;color:var(--sub)">Loading patient report…</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span class="toast-icon">✓</span><span id="toast-msg"></span></div>
+
+<script>
+// ═══════════════════════════════════════════
+// ⚠️  IMPORTANT: Replace with your laptop's local IP
+//     Run `ipconfig` on Windows → look for IPv4 Address
+//     e.g. 'http://192.168.1.42:3001'
+// ═══════════════════════════════════════════
+const API_BASE = 'http://localhost:3001';
+const API = API_BASE;
+let DB = { patients: [], doctors: [], rooms: [], admissions: [], treatments: [], bills: [], organs: [], visits: [] };
+let activity = [];
+let currentUserRole = 'Admin';
+
+async function apiFetch(path, method = 'GET', body = null) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || res.statusText);
+  }
+  return res.json();
+}
+
+async function loadAll() {
+  try {
+    const [patients, doctors, rooms, admissions, treatments, bills, organs, visits] = await Promise.all([
+      apiFetch('/api/patients'), apiFetch('/api/doctors'), apiFetch('/api/rooms'),
+      apiFetch('/api/admissions'), apiFetch('/api/treatments'), apiFetch('/api/bills'),
+      apiFetch('/api/organs'), apiFetch('/api/visits'),
+    ]);
+    DB = { patients, doctors, rooms, admissions, treatments, bills, organs, visits };
+    document.getElementById('db-status-badge').textContent = '● LIVE';
+    document.getElementById('db-status-badge').style.background = 'var(--green)';
+  } catch (err) {
+    document.getElementById('db-status-badge').textContent = '● DB ERROR';
+    document.getElementById('db-status-badge').style.background = 'var(--red)';
+    showToast('⚠️ Cannot connect to backend. Is server.js running?', '❌');
+  }
+}
+
+function pName(id) { const p = DB.patients.find(x => x.id === id); return p ? p.name : id; }
+function dName(id) { const d = DB.doctors.find(x => x.id === id); return d ? d.name : id; }
+function rNum(id)  { const r = DB.rooms.find(x => x.id === id);   return r ? r.num : id; }
+
+function setErr(fid, msg) {
+  const el = document.getElementById(fid); if (el) el.classList.add('invalid');
+  const er = document.getElementById('err-' + fid); if (er) er.textContent = msg;
+}
+function clearErr(fid) {
+  const el = document.getElementById(fid); if (el) el.classList.remove('invalid');
+  const er = document.getElementById('err-' + fid); if (er) er.textContent = '';
+}
+function clearFields(ids) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('invalid'); }
+    const er = document.getElementById('err-' + id); if (er) er.textContent = '';
+  });
+}
+
+// ═══════════════════════════════════════════
+// LOGIN — FIXED (no stray API call)
+// ═══════════════════════════════════════════
+const USERS = [
+  { username:'admin',   password:'admin123', role:'Admin' },
+  { username:'doctor',  password:'doc123',   role:'Doctor' },
+  { username:'nurse',   password:'nurse123', role:'Nurse' },
+  { username:'billing', password:'bill123',  role:'Billing' },
+];
+let selectedRole = 'Admin';
+
+function selectRole(btn, role) {
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected'); selectedRole = role;
+  const map = { Admin:'admin', Doctor:'doctor', Nurse:'nurse', Billing:'billing' };
+  document.getElementById('login-user').value = map[role];
+  document.getElementById('login-pass').value = '';
+}
+
+async function doLogin() {
+  const user = document.getElementById('login-user').value.trim();
+  const pass = document.getElementById('login-pass').value.trim();
+  const err  = document.getElementById('login-error');
+  const match = USERS.find(u => u.username === user && u.password === pass);
+  if (!match) { err.classList.add('show'); return; }
+  err.classList.remove('show');
+  currentUserRole = match.role;
+  document.querySelector('.avatar').textContent = match.role.slice(0,2).toUpperCase();
+  document.querySelector('.avatar').title = match.role;
+  document.getElementById('login-page').classList.add('login-fade-out');
+  setTimeout(() => { document.getElementById('login-page').style.display = 'none'; }, 400);
+  showToast(`Welcome, ${match.role}!`, '👋');
+  await loadAll(); renderAll();
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function navigate(page, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  else document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes(`'${page}'`)) n.classList.add('active');
+  });
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const titles = { dashboard:'Dashboard', patients:'Patient Records', opd:'OPD Visits 🩺', doctors:'Doctor Directory', admissions:'Admissions (IPD)', rooms:'Room Management', treatments:'Treatment Records', billing:'Billing & Invoices', organs:'Organ Registry', reports:'Reports & SQL', 'patient-history':'Patient History 🌐', 'doctor-profile':'Doctor Profile 🌐' };
+  document.getElementById('page-title').textContent = titles[page] || page;
+  if (page === 'patient-history') {
+    document.getElementById('ph-role-guard').style.display = (currentUserRole !== 'Admin' && currentUserRole !== 'Doctor') ? 'block' : 'none';
+    document.getElementById('ph-main-content').style.display = (currentUserRole !== 'Admin' && currentUserRole !== 'Doctor') ? 'none' : 'block';
+  }
+  renderAll();
+}
+
+function renderAll() {
+  renderDashboard(); renderPatients(); renderOPD(); renderDoctors(); renderRooms();
+  renderAdmissions(); renderTreatments(); renderBilling(); renderOrgans(); renderReports();
+  populateSelects(); renderPatientHistoryPills(); renderDoctorProfilePills();
+}
+
+// ═══════════════════════════════════════════
+// RENDER FUNCTIONS
+// ═══════════════════════════════════════════
+function renderDashboard() {
+  document.getElementById('stat-patients').textContent = DB.patients.length;
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('stat-opd').textContent = DB.visits.filter(v => v.date && v.date.slice(0,10) === today).length;
+  const avail = DB.rooms.filter(r => r.status === 'Available').length;
+  document.getElementById('stat-rooms-avail').textContent = avail + '/' + DB.rooms.length;
+  const rev = DB.bills.reduce((s, b) => s + Number(b.amount), 0);
+  document.getElementById('stat-revenue').textContent = '₹' + rev.toLocaleString('en-IN');
+  document.getElementById('bill-total-display').textContent = '₹' + rev.toLocaleString('en-IN');
+  document.getElementById('dash-admissions').innerHTML = DB.admissions.slice(-5).reverse().map(a => `<tr>
+    <td class="td-bold">${pName(a.patient)}</td><td>${dName(a.doctor)}</td><td>${rNum(a.room)}</td>
+    <td><span class="status status-${(a.status||'admitted').toLowerCase()}">${a.status||'Admitted'}</span></td>
+  </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--sub);padding:20px">No admissions yet</td></tr>';
+  const paid = DB.bills.filter(b => b.status==='Paid').reduce((s,b) => s+Number(b.amount),0);
+  const pend = DB.bills.filter(b => b.status==='Pending').reduce((s,b) => s+Number(b.amount),0);
+  document.getElementById('dept-bars').innerHTML = `
+    <div class="mini-bar-row"><div class="mini-bar-label">Paid</div><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${rev?paid/rev*100:0}%;background:var(--green)"></div></div><div class="mini-bar-val" style="color:var(--green)">₹${(paid/1000).toFixed(0)}k</div></div>
+    <div class="mini-bar-row"><div class="mini-bar-label">Pending</div><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${rev?pend/rev*100:0}%;background:var(--amber)"></div></div><div class="mini-bar-val" style="color:var(--amber)">₹${(pend/1000).toFixed(0)}k</div></div>`;
+  document.getElementById('activity-feed').innerHTML = activity.length
+    ? activity.slice(0,10).map(a => `<div class="activity-item"><div class="act-dot"></div><div><div class="act-text">${a.text}</div><div class="act-time">${a.time}</div></div></div>`).join('')
+    : '<div style="color:var(--sub);font-size:13px">No recent activity</div>';
+}
+
+function renderOPD() {
+  const today = new Date().toISOString().slice(0,10);
+  const opdRev = DB.visits.reduce((s,v) => s+Number(v.fee||0),0);
+  document.getElementById('opd-total').textContent = DB.visits.length;
+  document.getElementById('opd-today').textContent = DB.visits.filter(v => v.date && v.date.slice(0,10)===today).length;
+  document.getElementById('opd-revenue').textContent = '₹'+opdRev.toLocaleString('en-IN');
+  document.getElementById('opd-doctors').textContent = new Set(DB.visits.map(v=>v.doctor)).size;
+  document.getElementById('tbl-visits').innerHTML = DB.visits.length
+    ? DB.visits.map(v => `<tr>
+        <td class="td-bold">${v.id}</td>
+        <td>${v.date?v.date.slice(0,10):'—'}</td>
+        <td><strong>${pName(v.patient)}</strong> <small style="color:var(--sub)">(${v.patient})</small></td>
+        <td>${dName(v.doctor)}</td>
+        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${v.symptoms||''}">${v.symptoms||'—'}</td>
+        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${v.diagnosis||''}">${v.diagnosis||'—'}</td>
+        <td>₹${Number(v.fee||0).toLocaleString('en-IN')}</td>
+        <td><span class="status ${v.status==='Completed'?'status-completed':v.status==='Follow-up'?'status-pending':'status-admitted'}">${v.status||'Completed'}</span></td>
+        <td><div style="display:flex;gap:6px">
+          ${currentUserRole==='Admin'||currentUserRole==='Doctor'?`<select onchange="changeVisitStatus('${v.id}',this.value)" style="padding:4px 8px;border-radius:7px;border:1.5px solid var(--border);font-size:12px;font-family:'DM Sans',sans-serif">
+            <option value="Completed" ${v.status==='Completed'?'selected':''}>Completed</option>
+            <option value="Follow-up" ${v.status==='Follow-up'?'selected':''}>Follow-up</option>
+            <option value="Referred" ${v.status==='Referred'?'selected':''}>Referred</option>
+          </select>`:''}
+          <button class="btn btn-sm btn-danger" onclick="deleteRecord('visits','${v.id}')">Delete</button>
+        </div></td>
+      </tr>`).join('')
+    : '<tr><td colspan="9" style="text-align:center;color:var(--sub);padding:30px">No OPD visits yet</td></tr>';
+}
+
+function renderPatients() {
+  document.getElementById('tbl-patients').innerHTML = DB.patients.length
+    ? DB.patients.map(p => `<tr>
+        <td class="td-bold">${p.id}</td><td>${p.name}</td><td>${p.age}</td><td>${p.phone}</td><td>${p.address}</td>
+        <td><span class="status status-critical" style="background:rgba(231,76,60,.08);color:var(--red)">${p.disease||'—'}</span></td>
+        <td><div style="display:flex;gap:6px">
+          <button class="btn btn-sm btn-outline" onclick="openOtpModal('${p.id}')">🔒 View Report</button>
+          <button class="btn btn-sm btn-outline" onclick="showQR('${p.id}')">📱 QR Card</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteRecord('patients','${p.id}')">Delete</button>
+        </div></td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" style="text-align:center;color:var(--sub);padding:30px">No patients found</td></tr>';
+}
+
+function renderDoctors() {
+  document.getElementById('tbl-doctors').innerHTML = DB.doctors.length
+    ? DB.doctors.map(d => `<tr>
+        <td class="td-bold">${d.id}</td><td>${d.name}</td><td>${d.spec}</td><td>${d.phone}</td>
+        <td><span class="status ${d.status==='Active'?'status-available':d.status==='On Leave'?'status-pending':'status-discharged'}">${d.status||'Active'}</span></td>
+        <td><div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${currentUserRole==='Admin'?`<select onchange="changeDoctorStatus('${d.id}',this.value)" style="padding:4px 8px;border-radius:7px;border:1.5px solid var(--border);font-size:12px;font-family:'DM Sans',sans-serif">
+            <option value="Active" ${d.status==='Active'?'selected':''}>Active</option>
+            <option value="On Leave" ${d.status==='On Leave'?'selected':''}>On Leave</option>
+            <option value="Inactive" ${d.status==='Inactive'?'selected':''}>Inactive</option>
+          </select>`:''}
+          <button class="btn btn-sm btn-danger" onclick="deleteRecord('doctors','${d.id}')">Delete</button>
+        </div></td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:30px">No doctors found</td></tr>';
+}
+
+function renderRooms() {
+  document.getElementById('tbl-rooms').innerHTML = DB.rooms.length
+    ? DB.rooms.map(r => `<tr>
+        <td class="td-bold">${r.id}</td><td>${r.num}</td><td>${r.type}</td>
+        <td><span class="status ${r.status==='Available'?'status-available':r.status==='Occupied'?'status-occupied':'status-pending'}">${r.status}</span></td>
+        <td><div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${currentUserRole==='Admin'?`<select onchange="changeRoomStatus('${r.id}',this.value)" style="padding:4px 8px;border-radius:7px;border:1.5px solid var(--border);font-size:12px;font-family:'DM Sans',sans-serif">
+            <option value="Available" ${r.status==='Available'?'selected':''}>Available</option>
+            <option value="Occupied" ${r.status==='Occupied'?'selected':''}>Occupied</option>
+            <option value="Under Maintenance" ${r.status==='Under Maintenance'?'selected':''}>Under Maintenance</option>
+          </select>`:''}
+          <button class="btn btn-sm btn-danger" onclick="deleteRecord('rooms','${r.id}')">Delete</button>
+        </div></td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" style="text-align:center;color:var(--sub);padding:30px">No rooms found</td></tr>';
+}
+
+function renderAdmissions() {
+  document.getElementById('tbl-admissions').innerHTML = DB.admissions.length
+    ? DB.admissions.map(a => `<tr>
+        <td class="td-bold">${a.id}</td><td>${a.dateIn||'—'}</td><td>${a.dateOut||'—'}</td>
+        <td><span class="status status-pending">${a.type||'—'}</span></td>
+        <td>${pName(a.patient)} <small style="color:var(--sub)">(${a.patient})</small></td>
+        <td>${dName(a.doctor)}</td><td>Room ${rNum(a.room)}</td>
+        <td><span class="status status-${(a.status||'admitted').toLowerCase()}">${a.status||'Admitted'}</span></td>
+        <td><div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${currentUserRole==='Admin'?`<select onchange="changeAdmissionStatus('${a.id}',this.value)" style="padding:4px 8px;border-radius:7px;border:1.5px solid var(--border);font-size:12px;font-family:'DM Sans',sans-serif">
+            <option value="Admitted" ${(a.status||'Admitted')==='Admitted'?'selected':''}>Admitted</option>
+            <option value="Discharged" ${a.status==='Discharged'?'selected':''}>Discharged</option>
+            <option value="Critical" ${a.status==='Critical'?'selected':''}>Critical</option>
+          </select>`:''}
+          <button class="btn btn-sm btn-danger" onclick="deleteRecord('admissions','${a.id}')">Delete</button>
+        </div></td>
+      </tr>`).join('')
+    : '<tr><td colspan="9" style="text-align:center;color:var(--sub);padding:30px">No admissions found</td></tr>';
+}
+
+function renderTreatments() {
+  document.getElementById('tbl-treatments').innerHTML = DB.treatments.length
+    ? DB.treatments.map(t => `<tr>
+        <td class="td-bold">${t.id}</td><td>${t.name}</td>
+        <td>₹${Number(t.cost).toLocaleString('en-IN')}</td>
+        <td class="td-bold">${t.admissionId||'—'}</td>
+        <td>${t.organId?`<span class="status status-available">${t.organId}</span>`:'<span style="color:var(--sub);font-size:12px">N/A</span>'}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="deleteRecord('treatments','${t.id}')">Delete</button></td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:30px">No treatments found</td></tr>';
+}
+
+function renderBilling() {
+  const rev = DB.bills.reduce((s,b) => s+Number(b.amount),0);
+  document.getElementById('bill-total-display').textContent = '₹'+rev.toLocaleString('en-IN');
+  const paid = DB.bills.filter(b=>b.status==='Paid').reduce((s,b)=>s+Number(b.amount),0);
+  const pend = DB.bills.filter(b=>b.status==='Pending').reduce((s,b)=>s+Number(b.amount),0);
+  document.getElementById('bill-status-bars').innerHTML = `
+    <div class="mini-bar-row"><div class="mini-bar-label">Paid</div><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${rev?paid/rev*100:0}%;background:var(--green)"></div></div><div class="mini-bar-val" style="color:var(--green)">₹${(paid/1000).toFixed(0)}k</div></div>
+    <div class="mini-bar-row"><div class="mini-bar-label">Pending</div><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${rev?pend/rev*100:0}%;background:var(--amber)"></div></div><div class="mini-bar-val" style="color:var(--amber)">₹${(pend/1000).toFixed(0)}k</div></div>`;
+  document.getElementById('tbl-bills').innerHTML = DB.bills.length
+    ? DB.bills.map(b => `<tr>
+        <td class="td-bold">${b.id}</td><td>${b.date||'—'}</td>
+        <td>₹${Number(b.amount).toLocaleString('en-IN')}</td>
+        <td><span class="status ${b.status==='Paid'?'status-available':b.status==='Pending'?'status-pending':'status-discharged'}">${b.status}</span></td>
+        <td class="td-bold">${b.admissionId||'—'}</td>
+        <td><div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${currentUserRole==='Admin'?`<select onchange="changeBillStatus('${b.id}',this.value)" style="padding:4px 8px;border-radius:7px;border:1.5px solid var(--border);font-size:12px;font-family:'DM Sans',sans-serif">
+            <option value="Pending" ${b.status==='Pending'?'selected':''}>Pending</option>
+            <option value="Paid" ${b.status==='Paid'?'selected':''}>Paid</option>
+            <option value="Partially Paid" ${b.status==='Partially Paid'?'selected':''}>Partially Paid</option>
+            <option value="Waived" ${b.status==='Waived'?'selected':''}>Waived</option>
+          </select>`:''}
+          <button class="btn btn-sm btn-danger" onclick="deleteRecord('bills','${b.id}')">Delete</button>
+        </div></td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:30px">No bills found</td></tr>';
+}
+
+function renderOrgans() {
+  document.getElementById('tbl-organs').innerHTML = DB.organs.length
+    ? DB.organs.map(o => `<tr>
+        <td class="td-bold">${o.id}</td><td>${o.name}</td>
+        <td><span class="status status-pending">${o.donorType||'—'}</span></td>
+        <td><span class="status ${o.avail==='Available'?'status-available':o.avail==='Reserved'?'status-pending':'status-discharged'}">${o.avail}</span></td>
+        <td><div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${currentUserRole==='Admin'?`<select onchange="changeOrganStatus('${o.id}',this.value)" style="padding:4px 8px;border-radius:7px;border:1.5px solid var(--border);font-size:12px;font-family:'DM Sans',sans-serif">
+            <option value="Available" ${o.avail==='Available'?'selected':''}>Available</option>
+            <option value="Reserved" ${o.avail==='Reserved'?'selected':''}>Reserved</option>
+            <option value="Used" ${o.avail==='Used'?'selected':''}>Used</option>
+          </select>`:''}
+          <button class="btn btn-sm btn-danger" onclick="deleteRecord('organs','${o.id}')">Delete</button>
+        </div></td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" style="text-align:center;color:var(--sub);padding:30px">No organ records found</td></tr>';
+}
+
+// ═══════════════════════════════════════════
+// SELECTS
+// ═══════════════════════════════════════════
+function populateSelects() {
+  const pOpts = DB.patients.map(p => `<option value="${p.id}">${p.name} — ${p.id}</option>`).join('');
+  const dOpts = DB.doctors.map(d => `<option value="${d.id}">${d.name} (${d.spec}) — ${d.id}</option>`).join('');
+  const rOpts = DB.rooms.filter(r => r.status==='Available').map(r => `<option value="${r.id}">Room ${r.num} – ${r.type}</option>`).join('');
+  const aOpts = DB.admissions.map(a => `<option value="${a.id}">${a.id} — ${pName(a.patient)}</option>`).join('');
+  const oOpts = DB.organs.filter(o => o.avail==='Available').map(o => `<option value="${o.id}">${o.id} — ${o.name}</option>`).join('');
+  const set = (id, prefix, opts) => { const el = document.getElementById(id); if (el) el.innerHTML = prefix + opts; };
+  set('a-patient','<option value="">-- Select Patient --</option>',pOpts);
+  set('a-doctor', '<option value="">-- Select Doctor --</option>',dOpts);
+  set('a-room',   '<option value="">-- Select Room --</option>',rOpts);
+  set('t-admission','<option value="">-- Select Admission --</option>',aOpts);
+  set('t-organ',  '<option value="">-- None --</option>',oOpts);
+  set('b-admission','<option value="">-- Select Admission --</option>',aOpts);
+  set('v-patient','<option value="">-- Select Patient --</option>',pOpts);
+  set('v-doctor', '<option value="">-- Select Doctor --</option>',dOpts);
+}
+
+// ═══════════════════════════════════════════
+// SAVE FUNCTIONS
+// ═══════════════════════════════════════════
+async function savePatient() {
+  let valid = true;
+  const id=document.getElementById('p-id').value.trim(), name=document.getElementById('p-name').value.trim(),
+        age=document.getElementById('p-age').value.trim(), phone=document.getElementById('p-phone').value.trim(),
+        address=document.getElementById('p-address').value.trim(), disease=document.getElementById('p-disease').value.trim();
+  if (!id)    { setErr('p-id','Patient ID is required'); valid=false; }
+  if (!name)  { setErr('p-name','Full Name is required'); valid=false; }
+  if (!age||+age<=0) { setErr('p-age','Valid Age is required'); valid=false; }
+  if (!phone||phone.length<10) { setErr('p-phone','Valid 10-digit phone required'); valid=false; }
+  if (!address) { setErr('p-address','Address is required'); valid=false; }
+  if (!disease) { setErr('p-disease','Disease is required'); valid=false; }
+  if (!valid) return;
+  try {
+    await apiFetch('/api/patients','POST',{id,name,age:+age,phone,address,disease});
+    activity.unshift({text:`Patient ${name} registered (${id})`,time:'Just now'});
+    clearFields(['p-id','p-name','p-age','p-phone','p-address','p-disease']);
+    closeModal('modal-patient'); await loadAll(); renderAll();
+    showToast(`Patient ${name} registered!`,'✓');
+  } catch(err){ showToast('Error: '+err.message,'❌'); }
+}
+
+async function saveVisit() {
+  let valid = true;
+  const id=document.getElementById('v-id').value.trim(), date=document.getElementById('v-date').value,
+        patient=document.getElementById('v-patient').value, doctor=document.getElementById('v-doctor').value,
+        symptoms=document.getElementById('v-symptoms').value.trim(), diagnosis=document.getElementById('v-diagnosis').value.trim(),
+        prescription=document.getElementById('v-prescription').value.trim(),
+        fee=document.getElementById('v-fee').value.trim(), status=document.getElementById('v-status').value;
+  if (!id)       { setErr('v-id','Visit ID is required'); valid=false; }
+  if (!date)     { setErr('v-date','Date is required'); valid=false; }
+  if (!patient)  { setErr('v-patient','Please select a Patient'); valid=false; }
+  if (!doctor)   { setErr('v-doctor','Please select a Doctor'); valid=false; }
+  if (!symptoms) { setErr('v-symptoms','Symptoms are required'); valid=false; }
+  if (!diagnosis){ setErr('v-diagnosis','Diagnosis is required'); valid=false; }
+  if (!fee||+fee<0){ setErr('v-fee','Valid fee is required'); valid=false; }
+  if (!valid) return;
+  try {
+    await apiFetch('/api/visits','POST',{id,date,patient,doctor,symptoms,diagnosis,prescription,fee:+fee,status});
+    activity.unshift({text:`OPD visit ${id} — ${pName(patient)} seen by ${dName(doctor)}`,time:'Just now'});
+    clearFields(['v-id','v-date','v-symptoms','v-diagnosis','v-prescription','v-fee']);
+    closeModal('modal-visit'); await loadAll(); renderAll();
+    showToast(`OPD Visit ${id} saved!`,'🩺');
+  } catch(err){ showToast('Error: '+err.message,'❌'); }
+}
+
+async function saveDoctor() {
+  let valid=true;
+  const id=document.getElementById('d-id').value.trim(), name=document.getElementById('d-name').value.trim(),
+        spec=document.getElementById('d-spec').value.trim(), phone=document.getElementById('d-phone').value.trim(),
+        status=document.getElementById('d-status').value;
+  if (!id)  { setErr('d-id','Doctor ID is required'); valid=false; }
+  if (!name){ setErr('d-name','Name is required'); valid=false; }
+  if (!spec){ setErr('d-spec','Specialization is required'); valid=false; }
+  if (!phone||phone.length<10){ setErr('d-phone','Valid 10-digit phone required'); valid=false; }
+  if (!valid) return;
+  try {
+    await apiFetch('/api/doctors','POST',{id,name,spec,phone,status});
+    activity.unshift({text:`${name} added to directory`,time:'Just now'});
+    clearFields(['d-id','d-name','d-spec','d-phone']); closeModal('modal-doctor');
+    await loadAll(); renderAll(); showToast(`${name} added!`,'✓');
+  } catch(err){ showToast('Error: '+err.message,'❌'); }
+}
+
+async function saveRoom() {
+  let valid=true;
+  const id=document.getElementById('r-id').value.trim(), num=document.getElementById('r-num').value.trim(),
+        type=document.getElementById('r-type').value, status=document.getElementById('r-status').value;
+  if (!id) { setErr('r-id','Room ID is required'); valid=false; }
+  if (!num){ setErr('r-num','Room Number is required'); valid=false; }
+  if (!valid) return;
+  try {
+    await apiFetch('/api/rooms','POST',{id,num,type,status});
+    clearFields(['r-id','r-num']); closeModal('modal-room');
+    await loadAll(); renderAll(); showToast(`Room ${num} added!`,'✓');
+  } catch(err){ showToast('Error: '+err.message,'❌'); }
+}
+
+async function saveAdmission() {
+  let valid=true;
+  const id=document.getElementById('a-id').value.trim(), dateIn=document.getElementById('a-date-in').value,
+        dateOut=document.getElementById('a-date-out').value, type=document.getElementById('a-type').value,
+        patient=document.getElementById('a-patient').value, doctor=document.getElementById('a-doctor').value,
+        room=document.getElementById('a-room').value;
+  if (!id)     { setErr('a-id','Admission ID is required'); valid=false; }
+  if (!dateIn) { setErr('a-date-in','Admission Date is required'); valid=false; }
+  if (!patient){ setErr('a-patient','Please select a Patient'); valid=false; }
+  if (!doctor) { setErr('a-doctor','Please select a Doctor'); valid=false; }
+  if (!room)   { setErr('a-room','Please select a Room'); valid=false; }
+  if (!valid) return;
+  try {
+    await apiFetch('/api/admissions','POST',{id,patient,doctor,room,dateIn,dateOut:dateOut||null,type,status:'Admitted'});
+    activity.unshift({text:`${pName(patient)} admitted (${id})`,time:'Just now'});
+    clearFields(['a-id','a-date-in','a-date-out']); closeModal('modal-admission');
+    await loadAll(); renderAll(); showToast(`Admission ${id} confirmed!`,'✓');
+  } catch(err){ showToast('Error: '+err.message,'❌'); }
+}
+
+async function saveTreatment() {
+  let valid=true;
+  const id=document.getElementById('t-id').value.trim(), name=document.getElementById('t-name').value.trim(),
+        cost=document.getElementById('t-cost').value.trim(), admission=document.getElementById('t-admission').value,
+        organ=document.getElementById('t-organ').value;
+  if (!id)       { setErr('t-id','Treatment ID is required'); valid=false; }
+  if (!name)     { setErr('t-name','Treatment Name is required'); valid=false; }
+  if (!cost||+cost<0){ setErr('t-cost','Valid Cost is required'); valid=false; }
+  if (!admission){ setErr('t-admission','Please select an Admission'); valid=false; }
+  if (!valid) return;
+  const adm = DB.admissions.find(a=>a.id===admission);
+  try {
+    await apiFetch('/api/treatments','POST',{id,name,cost:+cost,admissionId:admission,patient:adm?adm.patient:'',organId:organ||null});
+    clearFields(['t-id','t-name','t-cost']); closeModal('modal-treatment');
+    await loadAll(); renderAll(); showToast(`Treatment ${id} saved!`,'✓');
+  } catch(err){ showToast('Error: '+err.message,'❌'); }
+}
+
+async function saveBill() {
+  let valid=true;
+  const id=document.getElementById('b-id').value.trim(), date=document.getElementById('b-date').value,
+        amount=document.getElementById('b-amount').value.trim(), status=document.getElementById('b-status').value,
+        admission=document.getElementById('b-admission').value;
+  if (!id)       { setErr('b-id','Bill ID is required'); valid=false; }
+  if (!date)     { setErr('b-date','Issue Date is required'); valid=false; }
+  if (!amount||+amount<=0){ setErr('b-amount','Valid Amount is required'); valid=false; }
+  if (!admission){ setErr('b-admission','Please select an Admission'); valid=false; }
+  if (!valid) return;
+  const adm = DB.admissions.find(a=>a.id===admission);
+  try {
+    await apiFetch('/api/bills','POST',{id,date,amount:+amount,status,admissionId:admission,patient:adm?adm.patient:''});
+    clearFields(['b-id','b-date','b-amount']); closeModal('modal-bill');
+    await loadAll(); renderAll(); showToast(`Bill ${id} generated!`,'✓');
+  } catch(err){ showToast('Error: '+err.message,'❌'); }
+}
+
+async function saveOrgan() {
+  let valid=true;
+  const id=document.getElementById('o-id').value.trim(), name=document.getElementById('o-name').value,
+        donorType=document.getElementById('o-donor-type').value, avail=document.getElementById('o-avail').value;
+  if (!id){ setErr('o-id','Organ ID is required'); valid=false; }
+  if (!valid) return;
+  try {
+    await apiFetch('/api/organs','POST',{id,name,donorType,avail});
+    clearFields(['o-id']); closeModal('modal-organ');
+    await loadAll(); renderAll(); showToast(`Organ record ${id} saved!`,'✓');
+  } catch(err){ showToast('Error: '+err.message,'❌'); }
+}
+
+// ═══════════════════════════════════════════
+// DELETE & STATUS
+// ═══════════════════════════════════════════
+async function deleteRecord(table, id) {
+  if (!confirm('Delete this record?')) return;
+  try {
+    await apiFetch('/api/'+table+'/'+id,'DELETE');
+    activity.unshift({text:`Record ${id} deleted from ${table}`,time:'Just now'});
+    await loadAll(); renderAll(); showToast('Record deleted','🗑');
+  } catch(err){ showToast('Error: '+err.message,'❌'); }
+}
+async function changeDoctorStatus(id,s)    { try { await apiFetch(`/api/doctors/${id}/status`,'PUT',{status:s}); await loadAll(); renderDoctors(); showToast(`Doctor → "${s}"`, '✏️'); } catch(e){ showToast('Error: '+e.message,'❌'); } }
+async function changeAdmissionStatus(id,s) { try { await apiFetch(`/api/admissions/${id}/status`,'PUT',{status:s}); await loadAll(); renderAdmissions(); renderDashboard(); showToast(`Admission → "${s}"`, '✏️'); } catch(e){ showToast('Error: '+e.message,'❌'); } }
+async function changeBillStatus(id,s)      { try { await apiFetch(`/api/bills/${id}/status`,'PUT',{status:s}); await loadAll(); renderBilling(); showToast(`Bill → "${s}"`, '✏️'); } catch(e){ showToast('Error: '+e.message,'❌'); } }
+async function changeRoomStatus(id,s)      { try { await apiFetch(`/api/rooms/${id}/status`,'PUT',{status:s}); await loadAll(); renderRooms(); showToast(`Room → "${s}"`, '🏥'); } catch(e){ showToast('Error: '+e.message,'❌'); } }
+async function changeOrganStatus(id,s)     { try { await apiFetch(`/api/organs/${id}/status`,'PUT',{avail:s}); await loadAll(); renderOrgans(); showToast(`Organ → "${s}"`, '❤️'); } catch(e){ showToast('Error: '+e.message,'❌'); } }
+async function changeVisitStatus(id,s)     { try { await apiFetch(`/api/visits/${id}/status`,'PUT',{status:s}); await loadAll(); renderOPD(); showToast(`Visit → "${s}"`, '🩺'); } catch(e){ showToast('Error: '+e.message,'❌'); } }
+
+// ═══════════════════════════════════════════
+// PATIENT HISTORY
+// ═══════════════════════════════════════════
+function renderPatientHistoryPills() {
+  const pills = document.getElementById('ph-quick-pills'); if (!pills) return;
+  pills.innerHTML = DB.patients.map(p => `<button class="ph-pill" onclick="openOtpModal('${p.id}')">🔒 ${p.name} <small style="opacity:.6">${p.id}</small></button>`).join('');
+}
+
+function searchPatientHistory() {
+  const query = (document.getElementById('ph-search-input').value||'').trim().toLowerCase();
+  if (!query) return;
+  const patient = DB.patients.find(p => p.id.toLowerCase().includes(query)||p.name.toLowerCase().includes(query));
+  if (patient) { openOtpModal(patient.id); }
+  else { document.getElementById('ph-empty').style.display='none'; document.getElementById('ph-result').style.display='none'; document.getElementById('ph-notfound').style.display='block'; }
+}
+
+function loadPatientHistory(pid) {
+  const patient = DB.patients.find(p => p.id===pid); if (!patient) return;
+  document.getElementById('ph-search-input').value = patient.id;
+  document.getElementById('ph-empty').style.display='none';
+  document.getElementById('ph-notfound').style.display='none';
+  document.getElementById('ph-result').style.display='block';
+  const initials = patient.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const admissions = DB.admissions.filter(a=>a.patient===pid);
+  const treatments = DB.treatments.filter(t=>t.patient===pid);
+  const bills      = DB.bills.filter(b=>b.patient===pid);
+  const visits     = DB.visits.filter(v=>v.patient===pid);
+  const billTotal  = bills.reduce((s,b)=>s+Number(b.amount),0);
+  document.getElementById('ph-banner').innerHTML = `
+    <div class="pb-avatar">${initials}</div>
+    <div class="pb-info">
+      <div class="pb-name">${patient.name}</div>
+      <div style="font-size:13px;opacity:.7;margin-top:2px">🦠 ${patient.disease}</div>
+      <div class="pb-meta"><span>🎂 Age ${patient.age}</span><span>📍 ${patient.address}</span><span>🏥 ${admissions.length} Admission(s)</span><span>🩺 ${visits.length} OPD Visit(s)</span><span>💊 ${treatments.length} Treatment(s)</span></div>
+    </div>
+    <div class="pb-id-badge">${pid}</div>`;
+  const events=[];
+  admissions.forEach(a=>{ const doc=DB.doctors.find(d=>d.id===a.doctor),room=DB.rooms.find(r=>r.id===a.room); events.push({date:a.dateIn,type:'admission',title:`Admitted — ${a.type}`,sub:`Dr. ${doc?doc.name:a.doctor} · Room ${room?room.num:a.room}`,status:a.status}); });
+  visits.forEach(v=>{ const doc=DB.doctors.find(d=>d.id===v.doctor); events.push({date:v.date,type:'visit',title:`OPD Visit — ${v.diagnosis}`,sub:`Dr. ${doc?doc.name:v.doctor} · ${v.symptoms} · Fee: ₹${Number(v.fee||0).toLocaleString('en-IN')}`,status:v.status}); });
+  treatments.forEach(t=>{ events.push({date:DB.admissions.find(a=>a.id===t.admissionId)?.dateIn||'—',type:'treatment',title:`Treatment: ${t.name}`,sub:`Cost: ₹${Number(t.cost).toLocaleString('en-IN')} · Admission: ${t.admissionId}`}); });
+  bills.forEach(b=>{ events.push({date:b.date,type:'bill',title:`Bill — ₹${Number(b.amount).toLocaleString('en-IN')}`,sub:`Status: ${b.status} · Admission: ${b.admissionId}`,status:b.status}); });
+  events.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const icons={admission:'🏥',treatment:'💊',bill:'💳',visit:'🩺'};
+  const scColors={Admitted:'rgba(13,115,119,.12)',Critical:'rgba(231,76,60,.12)',Discharged:'rgba(39,174,96,.12)',Paid:'rgba(39,174,96,.12)',Pending:'rgba(243,156,18,.12)',Completed:'rgba(39,174,96,.12)','Follow-up':'rgba(243,156,18,.12)'};
+  const scText={Admitted:'var(--teal)',Critical:'var(--red)',Discharged:'var(--green)',Paid:'var(--green)',Pending:'var(--amber)',Completed:'var(--green)','Follow-up':'var(--amber)'};
+  document.getElementById('ph-timeline').innerHTML = events.length
+    ? events.map(ev=>`<div class="timeline-item"><div class="tl-dot ${ev.type}">${icons[ev.type]}</div><div class="tl-card"><div class="tl-card-title">${ev.title} ${ev.status?`<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${scColors[ev.status]||'#eee'};color:${scText[ev.status]||'#999'}">${ev.status}</span>`:''}</div><div class="tl-card-sub">${ev.sub}</div><div class="tl-card-date">${ev.date}</div></div></div>`).join('')
+    : '<div style="color:var(--sub);font-size:13px;padding:20px">No medical events recorded yet.</div>';
+  const paidAmt=bills.filter(b=>b.status==='Paid').reduce((s,b)=>s+Number(b.amount),0);
+  const pendAmt=bills.filter(b=>b.status==='Pending').reduce((s,b)=>s+Number(b.amount),0);
+  const opdFees=visits.reduce((s,v)=>s+Number(v.fee||0),0);
+  const assignedDocIds=[...new Set([...admissions.map(a=>a.doctor),...visits.map(v=>v.doctor)])];
+  const docRows=assignedDocIds.map(did=>{const d=DB.doctors.find(x=>x.id===did);return d?`<div class="info-row"><span class="info-label">${d.spec}</span><span class="info-val">${d.name}</span></div>`:''}).join('')||'<div style="color:var(--sub);font-size:12px">No assigned doctors</div>';
+  document.getElementById('ph-side-panels').innerHTML=`
+    <div class="ph-side-card"><div class="ph-side-title">👨‍⚕️ Assigned Doctors</div>${docRows}</div>
+    <div class="ph-side-card"><div class="ph-side-title">💳 Bill Summary</div>
+      <div class="info-row"><span class="info-label">IPD Bills</span><span class="info-val">₹${billTotal.toLocaleString('en-IN')}</span></div>
+      <div class="info-row"><span class="info-label">OPD Fees</span><span class="info-val" style="color:var(--purple)">₹${opdFees.toLocaleString('en-IN')}</span></div>
+      <div class="info-row"><span class="info-label">Paid</span><span class="info-val" style="color:var(--green)">₹${paidAmt.toLocaleString('en-IN')}</span></div>
+      <div class="info-row"><span class="info-label">Pending</span><span class="info-val" style="color:var(--amber)">₹${pendAmt.toLocaleString('en-IN')}</span></div>
+    </div>
+    <div class="ph-side-card"><div class="ph-side-title">📊 Patient Info</div>
+      <div class="info-row"><span class="info-label">ID</span><span class="info-val" style="color:var(--teal)">${pid}</span></div>
+      <div class="info-row"><span class="info-label">Age</span><span class="info-val">${patient.age} yrs</span></div>
+      <div class="info-row"><span class="info-label">Diagnosis</span><span class="info-val">${patient.disease}</span></div>
+      <div class="info-row"><span class="info-label">OPD Visits</span><span class="info-val" style="color:var(--purple)">${visits.length}</span></div>
+      <div class="info-row"><span class="info-label">IPD Admissions</span><span class="info-val">${admissions.length}</span></div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+// DOCTOR PROFILE
+// ═══════════════════════════════════════════
+function renderDoctorProfilePills() {
+  const pills = document.getElementById('dp-quick-pills'); if (!pills) return;
+  pills.innerHTML = DB.doctors.map(d=>`<button class="ph-pill" onclick="loadDoctorProfile('${d.id}')">👨‍⚕️ ${d.name} <small style="opacity:.6">${d.id}</small></button>`).join('');
+}
+
+function searchDoctorProfile() {
+  const query=(document.getElementById('dp-search-input').value||'').trim().toLowerCase();
+  if (!query) return;
+  const doctor=DB.doctors.find(d=>d.id.toLowerCase().includes(query)||d.name.toLowerCase().includes(query));
+  if (doctor) { loadDoctorProfile(doctor.id); }
+  else { document.getElementById('dp-empty').style.display='none'; document.getElementById('dp-result').style.display='none'; document.getElementById('dp-notfound').style.display='block'; }
+}
+
+function loadDoctorProfile(did) {
+  const doctor=DB.doctors.find(d=>d.id===did); if (!doctor) return;
+  document.getElementById('dp-search-input').value=doctor.id;
+  document.getElementById('dp-empty').style.display='none'; document.getElementById('dp-notfound').style.display='none'; document.getElementById('dp-result').style.display='block';
+  const docAdmissions=DB.admissions.filter(a=>a.doctor===did);
+  const docVisits=DB.visits.filter(v=>v.doctor===did);
+  const assignedPatientIds=[...new Set([...docAdmissions.map(a=>a.patient),...docVisits.map(v=>v.patient)])];
+  const totalTreatments=DB.treatments.filter(t=>docAdmissions.some(a=>a.id===t.admissionId)).length;
+  const statusLabel=doctor.status==='Active'?'🟢 Active':doctor.status==='On Leave'?'🟡 On Leave':'🔴 Inactive';
+  document.getElementById('dp-banner').innerHTML=`
+    <div style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.15);display:grid;place-items:center;font-size:30px;flex-shrink:0;border:3px solid rgba(255,255,255,.3)">👨‍⚕️</div>
+    <div class="db-info"><div class="db-name">${doctor.name}</div><div style="font-size:14px;opacity:.8;margin-top:2px">🩺 ${doctor.spec}</div>
+    <div class="db-meta"><span>${statusLabel}</span><span>🏥 ${docAdmissions.length} IPD</span><span>🩺 ${docVisits.length} OPD</span></div>
+    <div class="db-private-badge">🔒 Phone hidden</div></div>`;
+  const patientRows=assignedPatientIds.map(pid=>{const p=DB.patients.find(x=>x.id===pid);return p?`<div class="info-row"><span><span class="info-label">${p.id}</span><br><span style="font-size:13px;font-weight:600;color:var(--navy)">${p.name}</span></span><span class="info-val"><span class="status status-admitted">${p.disease}</span></span></div>`:''}).join('')||'<div style="color:var(--sub);font-size:12px">No patients assigned</div>';
+  document.getElementById('dp-patients-panel').innerHTML=`<div class="ph-side-card" style="margin-bottom:0"><div class="ph-side-title">👥 Patients (${assignedPatientIds.length})</div>${patientRows}</div>`;
+  document.getElementById('dp-stats-panel').innerHTML=`<div class="ph-side-card"><div class="ph-side-title">📊 Stats</div><div class="doc-stats-row">
+    <div class="doc-stat-box"><div class="doc-stat-val" style="color:var(--teal)">${assignedPatientIds.length}</div><div class="doc-stat-label">Patients</div></div>
+    <div class="doc-stat-box"><div class="doc-stat-val" style="color:var(--green)">${docAdmissions.length}</div><div class="doc-stat-label">IPD</div></div>
+    <div class="doc-stat-box"><div class="doc-stat-val" style="color:var(--purple)">${docVisits.length}</div><div class="doc-stat-label">OPD</div></div>
+    <div class="doc-stat-box"><div class="doc-stat-val" style="color:var(--amber)">${totalTreatments}</div><div class="doc-stat-label">Treatments</div></div>
+  </div></div>`;
+}
+
+// ═══════════════════════════════════════════
+// REPORTS
+// ═══════════════════════════════════════════
+const SQL_QUERIES = [
+  { title:'Total Patients Per Doctor', query:`SELECT d.name AS Doctor, COUNT(*) AS Patients\nFROM doctor d JOIN admission a ON d.id = a.doctor\nGROUP BY d.name ORDER BY Patients DESC;`, result:()=>DB.doctors.map(d=>({Doctor:d.name,Patients:DB.admissions.filter(a=>a.doctor===d.id).length})).sort((a,b)=>b.Patients-a.Patients) },
+  { title:'OPD Visits Per Doctor', query:`SELECT d.name AS Doctor, COUNT(*) AS OPD_Visits\nFROM doctor d JOIN visit v ON d.id = v.doctor\nGROUP BY d.name ORDER BY OPD_Visits DESC;`, result:()=>DB.doctors.map(d=>({Doctor:d.name,'OPD Visits':DB.visits.filter(v=>v.doctor===d.id).length})).filter(r=>r['OPD Visits']>0).sort((a,b)=>b['OPD Visits']-a['OPD Visits']) },
+  { title:'Outstanding Bills (Pending)', query:`SELECT p.name AS Patient, b.amount AS Amount\nFROM bill b JOIN patient p ON b.patient = p.id\nWHERE b.status = 'Pending';`, result:()=>DB.bills.filter(b=>b.status==='Pending').map(b=>({Patient:pName(b.patient),Amount:'₹'+Number(b.amount).toLocaleString('en-IN')})) },
+  { title:'Available Rooms', query:`SELECT num AS Room, type AS Type FROM room WHERE status = 'Available';`, result:()=>DB.rooms.filter(r=>r.status==='Available').map(r=>({Room:r.num,Type:r.type})) },
+  { title:'OPD vs IPD Count', query:`SELECT 'OPD' AS Type, COUNT(*) AS Count FROM visit\nUNION SELECT 'IPD', COUNT(*) FROM admission;`, result:()=>[{Type:'OPD (Outpatient)',Count:DB.visits.length},{Type:'IPD (Inpatient)',Count:DB.admissions.length}] },
+  { title:'Revenue Summary', query:`SELECT SUM(amount) AS Total, SUM(CASE WHEN status='Paid' THEN amount ELSE 0 END) AS Paid,\nSUM(CASE WHEN status='Pending' THEN amount ELSE 0 END) AS Pending FROM bill;`, result:()=>{ const total=DB.bills.reduce((s,b)=>s+Number(b.amount),0),paid=DB.bills.filter(b=>b.status==='Paid').reduce((s,b)=>s+Number(b.amount),0); return [{Total:'₹'+total.toLocaleString('en-IN'),Paid:'₹'+paid.toLocaleString('en-IN'),Pending:'₹'+(total-paid).toLocaleString('en-IN')}]; } },
+];
+function renderReports() {
+  document.getElementById('sql-cards').innerHTML = SQL_QUERIES.map(q => {
+    const rows=q.result(), cols=rows.length?Object.keys(rows[0]):[];
+    const tableHtml=rows.length?`<table style="margin-top:10px;width:100%;border-collapse:collapse"><thead><tr>${cols.map(c=>`<th style="background:#f5f8fa;padding:7px 10px;font-size:10px;text-transform:uppercase;color:#5A7A8A;letter-spacing:.7px;border-bottom:1px solid #D6E4EC;text-align:left">${c}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td style="padding:7px 10px;border-bottom:1px solid #f0f4f7;font-size:13px">${r[c]}</td>`).join('')}</tr>`).join('')}</tbody></table>`:'<p style="color:#5A7A8A;font-size:12px;margin-top:8px">No data</p>';
+    return `<div class="card card-body"><div class="sec-title" style="font-size:14px;margin-bottom:10px">${q.title}</div><pre style="background:#0A1628;color:#1BC6A8;padding:12px;border-radius:9px;font-size:11.5px;overflow-x:auto;line-height:1.6;white-space:pre-wrap">${q.query}</pre>${tableHtml}</div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => { m.addEventListener('click', e => { if (e.target===m) m.classList.remove('open'); }); });
+
+function filterTable(tableId, query, cols) {
+  const q=query.toLowerCase();
+  document.querySelectorAll('#'+tableId+' tr').forEach(tr => {
+    const cells=tr.querySelectorAll('td');
+    tr.style.display=cols.some(i=>cells[i]&&cells[i].textContent.toLowerCase().includes(q))?'':'none';
+  });
+}
+
+function showToast(msg, icon='✓') {
+  const t=document.getElementById('toast');
+  t.querySelector('.toast-icon').textContent=icon;
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ═══════════════════════════════════════════
+// OTP — FIXED (fetch call restored)
+// ═══════════════════════════════════════════
+let _otpSessionId='', _otpPatientId='', _otpTimer=null, _otpSeconds=300;
+function maskPhone(phone) { const s=String(phone); return s.slice(0,2)+'×'.repeat(Math.max(0,s.length-4))+s.slice(-2); }
+
+function openOtpModal(pid) {
+  const patient=DB.patients.find(p=>p.id===pid); if (!patient) return;
+  _otpPatientId=pid; clearInterval(_otpTimer);
+  document.getElementById('otp-step1').classList.remove('hidden');
+  document.getElementById('otp-step2').classList.add('hidden');
+  document.getElementById('otp-step3').classList.add('hidden');
+  document.getElementById('otp-sms-bubble').classList.remove('show');
+  document.getElementById('otp-error').classList.remove('show');
+  [1,2,3,4,5,6].forEach(i=>{ const el=document.getElementById('otp-d'+i); el.value=''; el.classList.remove('filled'); });
+  document.getElementById('otp-patient-name').textContent=patient.name+' · '+patient.id;
+  document.getElementById('otp-phone-masked').textContent='📱 +91 '+maskPhone(patient.phone);
+  document.getElementById('modal-otp').classList.add('open');
+}
+
+function closeOtpModal() { document.getElementById('modal-otp').classList.remove('open'); clearInterval(_otpTimer); }
+
+async function sendOtp() {
+  const patient=DB.patients.find(p=>p.id===_otpPatientId); if (!patient) return;
+  const btn=document.querySelector('.send-otp-btn'); btn.disabled=true; btn.textContent='⏳ Sending…';
+  try {
+    const res=await fetch(`${API}/send-otp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({patientId:patient.id,phone:patient.phone})});
+    const data=await res.json();
+    if (!res.ok) throw new Error(data.error||'Failed to send OTP');
+    _otpSessionId=data.sessionId;
+    document.getElementById('otp-step1').classList.add('hidden');
+    document.getElementById('otp-step2').classList.remove('hidden');
+    if (data.mock&&data.otp) { document.getElementById('otp-sms-code-display').textContent=data.otp; document.getElementById('otp-sms-bubble').classList.add('show'); }
+    _otpSeconds=300; clearInterval(_otpTimer); updateCountdown();
+    _otpTimer=setInterval(()=>{ _otpSeconds--; updateCountdown(); if(_otpSeconds<=0){ clearInterval(_otpTimer); document.getElementById('otp-error').textContent='⏱ OTP expired.'; document.getElementById('otp-error').classList.add('show'); _otpSessionId=''; }},1000);
+    showToast(`OTP sent to ${patient.name}'s phone`,'📱');
+    document.getElementById('otp-d1').focus();
+  } catch(err){ document.getElementById('otp-error').textContent='❌ '+err.message; document.getElementById('otp-error').classList.add('show'); }
+  finally { btn.disabled=false; btn.textContent="📤 Send OTP to Patient's Phone"; }
+}
+
+function updateCountdown() { const m=Math.floor(_otpSeconds/60),s=_otpSeconds%60; document.getElementById('otp-countdown').textContent=m+':'+String(s).padStart(2,'0'); }
+function resendOtp() { document.getElementById('otp-error').classList.remove('show'); [1,2,3,4,5,6].forEach(i=>{const el=document.getElementById('otp-d'+i);el.value='';el.classList.remove('filled');}); sendOtp(); }
+function otpInput(el,idx) { el.value=el.value.replace(/[^0-9]/g,''); el.classList.toggle('filled',el.value!==''); if(el.value&&idx<6) document.getElementById('otp-d'+(idx+1)).focus(); if(idx===6&&el.value) verifyOtp(); }
+function otpKey(e,idx) { if(e.key==='Backspace'&&!document.getElementById('otp-d'+idx).value&&idx>1) document.getElementById('otp-d'+(idx-1)).focus(); }
+
+async function verifyOtp() {
+  const entered=[1,2,3,4,5,6].map(i=>document.getElementById('otp-d'+i).value).join('');
+  if (entered.length<6) { document.getElementById('otp-error').textContent='⚠️ Enter all 6 digits.'; document.getElementById('otp-error').classList.add('show'); return; }
+  if (!_otpSessionId) { document.getElementById('otp-error').textContent='⏱ OTP expired.'; document.getElementById('otp-error').classList.add('show'); return; }
+  const btn=document.querySelector('.verify-otp-btn'); btn.disabled=true; btn.textContent='⏳ Verifying…';
+  try {
+    const res=await fetch(`${API}/verify-otp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:_otpSessionId,otp:entered})});
+    const data=await res.json();
+    if (!res.ok) {
+      document.getElementById('otp-error').textContent='❌ '+(data.error||'Verification failed.');
+      document.getElementById('otp-error').classList.add('show');
+      [1,2,3,4,5,6].forEach(i=>{const el=document.getElementById('otp-d'+i);el.value='';el.classList.remove('filled');});
+      document.getElementById('otp-d1').focus(); return;
+    }
+    clearInterval(_otpTimer); _otpSessionId='';
+    document.getElementById('otp-error').classList.remove('show');
+    document.getElementById('otp-step2').classList.add('hidden');
+    document.getElementById('otp-step3').classList.remove('hidden');
+    showToast('OTP verified! Opening report…','🔓');
+    setTimeout(()=>{ closeOtpModal(); navigate('patient-history',null); loadPatientHistory(_otpPatientId); },1200);
+  } catch(err) {
+    document.getElementById('otp-error').textContent='❌ Server error.';
+    document.getElementById('otp-error').classList.add('show');
+  } finally { btn.disabled=false; btn.textContent='✅ Verify & View Report'; }
+}
+
+// ═══════════════════════════════════════════
+// QR CARD — client-side generation
+// ═══════════════════════════════════════════
+async function showQR(patientId) {
+  try {
+    showToast('Generating QR Card...','⏳');
+    const patient=DB.patients.find(p=>p.id===patientId);
+    if (!patient) { showToast('Patient not found','❌'); return; }
+    const directUrl=`Patient ID: ${patient.id} | Name: ${patient.name} | Age: ${patient.age} | Diagnosis: ${patient.disease}`;
+    const win=window.open('','_blank');
+    win.document.write(`<!DOCTYPE html><html><head><title>HealHub — Patient QR Card</title>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+      <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:sans-serif;background:#F5F8FA;display:flex;align-items:center;justify-content:center;min-height:100vh}.card{background:white;border-radius:16px;padding:28px 24px;width:320px;box-shadow:0 4px 24px rgba(13,115,119,0.12);border:1px solid #D6E4EC}.header{text-align:center;margin-bottom:20px}.brand{font-size:22px;font-weight:700;color:#0D7377}.brand-sub{font-size:10px;color:#5A7A8A;letter-spacing:2px;text-transform:uppercase;margin-top:2px}.qr-wrap{display:flex;justify-content:center;margin:16px 0;padding:10px;border:3px solid #0D7377;border-radius:12px}#qrcode canvas,#qrcode img{width:200px!important;height:200px!important}.patient-name{font-size:20px;font-weight:700;color:#0A1628;text-align:center;margin-bottom:4px;margin-top:12px}.patient-id{text-align:center;margin-bottom:16px}.patient-id span{background:#E1F5EE;color:#0F6E56;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px}.info-table{width:100%;border-collapse:collapse;margin-bottom:16px}.info-table tr{border-bottom:1px solid #F0F4F7}.info-table tr:last-child{border-bottom:none}.info-table td{padding:8px 4px;font-size:13px}.lbl{color:#5A7A8A;font-size:11px;font-weight:600;text-transform:uppercase}.val{font-weight:600;color:#0A1628;text-align:right}.url-box{background:#f5f8fa;border:1px solid #D6E4EC;border-radius:8px;padding:8px 12px;font-size:10px;color:#5A7A8A;word-break:break-all;margin-bottom:16px;text-align:center}.scan-hint{text-align:center;font-size:11px;color:#5A7A8A;margin-bottom:16px;padding:8px;background:#F5F8FA;border-radius:8px;line-height:1.6}.print-btn{width:100%;padding:12px;background:#0D7377;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}.footer{text-align:center;font-size:10px;color:#5A7A8A;margin-top:14px}@media print{.print-btn{display:none}body{background:white}.card{box-shadow:none}}</style>
+      </head><body><div class="card">
+        <div class="header"><div class="brand">🏥 HealHub</div><div class="brand-sub">Patient Identity Card</div></div>
+        <div class="qr-wrap"><div id="qrcode"></div></div>
+        <div class="patient-name">${patient.name}</div>
+        <div class="patient-id"><span>${patient.id}</span></div>
+        <table class="info-table">
+          <tr><td class="lbl">Age</td><td class="val">${patient.age} years</td></tr>
+          <tr><td class="lbl">Diagnosis</td><td class="val">${patient.disease||'—'}</td></tr>
+          <tr><td class="lbl">Phone</td><td class="val">${String(patient.phone).slice(0,2)}××××${String(patient.phone).slice(-2)}</td></tr>
+          <tr><td class="lbl">Issued</td><td class="val">${new Date().toLocaleDateString('en-IN')}</td></tr>
+        </table>
+        <div class="url-box">🔗 ${directUrl}</div>
+        <div class="scan-hint">📱 Scan QR with phone camera<br/>Opens patient profile in HealHub<br/>OTP verification required</div>
+        <button class="print-btn" onclick="window.print()">🖨️ Print This Card</button>
+        <div class="footer">SRM Institute of Science & Technology · HealHub HMS v3.1</div>
+      </div>
+      <script>window.onload=function(){new QRCode(document.getElementById("qrcode"),{text:"${directUrl}",width:200,height:200,colorDark:"#0D7377",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});};<\/script>
+      </body></html>`);
+    win.document.close();
+    showToast('QR Card generated!','📱');
+  } catch(err){ showToast('Error: '+err.message,'❌'); }
+}
+
+// ═══════════════════════════════════════════
+// INIT — single unified flow, no race condition
+// ═══════════════════════════════════════════
+(async () => {
+  const params = new URLSearchParams(window.location.search);
+  const patientId = params.get('patient');
+
+  if (patientId) {
+    // QR SCAN FLOW — skip login, load data, open OTP
+    document.getElementById('login-page').style.display = 'none';
+    currentUserRole = 'Doctor';
+    document.querySelector('.avatar').textContent = 'DR';
+    document.querySelector('.avatar').title = 'Doctor';
+    try {
+      await loadAll();
+      renderAll();
+      const patient = DB.patients.find(p => p.id === patientId);
+      if (!patient) { showToast('❌ Patient not found: ' + patientId, '❌'); return; }
+      showToast('📱 QR Scanned — ' + patient.name, '📱');
+      setTimeout(() => { navigate('patient-history', null); openOtpModal(patientId); }, 600);
+    } catch(err) {
+      showToast('❌ Failed to load data: ' + err.message, '❌');
+    }
+  } else {
+    // NORMAL LOGIN FLOW
+    await loadAll();
+    renderAll();
+  }
+})();
+</script>
+</body>
+</html>
